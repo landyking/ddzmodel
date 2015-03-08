@@ -6,6 +6,15 @@ package com.jfreer.game.ddz;
 public class TableOperate {
     protected Player player;
     private Integer destTableId;
+    private Runnable callback;
+
+    public void setCallback(Runnable callback) {
+        this.callback = callback;
+    }
+
+    public Runnable getCallback() {
+        return callback;
+    }
 
     public Integer getDestTableId() {
         return destTableId;
