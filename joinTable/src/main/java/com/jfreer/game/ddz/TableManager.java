@@ -72,7 +72,7 @@ public class TableManager {
                     table.joinTable(player);
                     if (table.isFull()) {
                         notFullTables.remove(table.getTableId());
-                        notifyTableFull(table);
+                        notifyOneTableFull(table);
                     }
                     if (join.getCallback() != null) {
                         DDZThreadPoolExecutor.INSTANCE.execute(join.getCallback());
@@ -90,7 +90,7 @@ public class TableManager {
                             notFullTables.remove(destTableId);
                             allTables.remove(destTableId);
                             Log.warn("桌子" + destTableId + "为空,回收!");
-                            notifyTableEmpty(table);
+                            notifyOneTableEmpty(table);
                         }
                     } else {
                         if (allTables.containsKey(destTableId)) {
@@ -112,11 +112,11 @@ public class TableManager {
         }
     }
 
-    protected void notifyTableEmpty(Table table) {
+    protected void notifyOneTableEmpty(Table table) {
 
     }
 
-    protected void notifyTableFull(Table table) {
+    protected void notifyOneTableFull(Table table) {
 
     }
 

@@ -77,7 +77,6 @@ public class Table {
     }
 
     public Player[] getPlayers() {
-        return
-        players.toArray(new Player[0]);
+        return players.toArray(new Player[0]);
     }
 }

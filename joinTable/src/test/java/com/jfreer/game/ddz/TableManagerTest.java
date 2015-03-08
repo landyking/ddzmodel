@@ -18,7 +18,7 @@ public class TableManagerTest {
         final CountDownLatch latch = new CountDownLatch(1);
         TableManager manager = new TableManager() {
             @Override
-            protected void notifyTableFull(Table table) {
+            protected void notifyOneTableFull(Table table) {
                 latch.countDown();
             }
         };
@@ -47,7 +47,7 @@ public class TableManagerTest {
         final CountDownLatch latch = new CountDownLatch(1);
         TableManager manager = new TableManager() {
             @Override
-            protected void notifyTableFull(Table table) {
+            protected void notifyOneTableFull(Table table) {
                 latch.countDown();
             }
         };
@@ -77,7 +77,7 @@ public class TableManagerTest {
         final CountDownLatch latch = new CountDownLatch(1);
         final TableManager manager = new TableManager() {
             @Override
-            protected void notifyTableFull(Table table) {
+            protected void notifyOneTableFull(Table table) {
                 latch.countDown();
             }
         };
@@ -115,7 +115,7 @@ public class TableManagerTest {
         final CountDownLatch latch = new CountDownLatch(1);
         final TableManager manager = new TableManager() {
             @Override
-            protected void notifyTableFull(Table table) {
+            protected void notifyOneTableFull(Table table) {
                 latch.countDown();
             }
         };
@@ -153,7 +153,7 @@ public class TableManagerTest {
         final CountDownLatch latch = new CountDownLatch(1);
         final TableManager manager = new TableManager() {
             @Override
-            protected void notifyTableEmpty(Table table) {
+            protected void notifyOneTableEmpty(Table table) {
                 latch.countDown();
             }
         };
@@ -194,7 +194,7 @@ public class TableManagerTest {
         final CountDownLatch latch = new CountDownLatch(1);
         final TableManager manager = new TableManager() {
             @Override
-            protected void notifyTableEmpty(Table table) {
+            protected void notifyOneTableEmpty(Table table) {
                 latch.countDown();
             }
         };
