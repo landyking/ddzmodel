@@ -25,8 +25,7 @@ public class Table {
             players[i].setHandCards(cards[i]);
         }
         blowCards = cards[players.length];
-        nextPos = rd.nextInt(3);
-        tableState = Consts.TableState.CallDealer;
+
     }
 
     public Table() {
@@ -39,25 +38,29 @@ public class Table {
     }
 
     public void mainLoop() {
-        /**
-         * 1.初始化参数
-         * 2.发牌
-         * 3.设置初始叫地主的玩家
-         * 4.叫地主
-         * 5.发底牌
-         * 6.地主开始出牌
-         * 7.游戏进行
-         * 8.游戏结束
-         */
-        boolean callDealerSuccess = false;
-        while (!callDealerSuccess) {
-            initTableAndPlayer();
-            publishCards();
-            initCallDealer();
-            callDealerSuccess = doCallDealer();
+        try {
+            /**
+             * 1.初始化参数
+             * 2.发牌
+             * 3.设置初始叫地主的玩家
+             * 4.叫地主
+             * 5.发底牌
+             * 6.地主开始出牌
+             * 7.游戏进行
+             * 8.游戏结束
+             */
+            boolean callDealerSuccess = false;
+            while (!callDealerSuccess) {
+                initTableAndPlayer();
+                publishCards();
+                initCallDealer();
+                callDealerSuccess = doCallDealer();
+            }
+            publishBlowCards();
+            playingCards();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        publishBlowCards();
-        playingCards();
     }
 
     private void playingCards() {
@@ -68,13 +71,68 @@ public class Table {
 
     }
 
-    private boolean doCallDealer() {
+    private boolean doCallDealer() throws InterruptedException {
+        while (true) {
+            TableOperate operate = operateQueue.take();
+            if (operate instanceof CallDealer) {
+                CallDealer callDealer = (CallDealer) operate;
+                if (tableState == Consts.TableState.CallDealer) {
+                    Player player = players[nextPos];
+                    if (callDealer.getPlayer().equals(player)) {
+                        if (callDealer.isCall()) {
+                            player.setCallDealerState(Consts.CallDealerState.call);
+                            dealerId = player.getPlayerId();
 
-        return false;
+                            tableState = Consts.TableState.RaiseDealer;
+
+                            Player nextPlayer = players[getNextPos(this.nextPos)];
+                            if (Consts.CallDealerState.notCall == nextPlayer.getCallDealerState()) {
+                                //最后一个叫地主
+                                tableState = Consts.TableState.Playing;
+                                return true;
+                            }
+                        } else {
+                            player.setCallDealerState(Consts.CallDealerState.notCall);
+
+                            Player nextPlayer = players[getNextPos(this.nextPos)];
+                            if (Consts.CallDealerState.notCall == nextPlayer.getCallDealerState()) {
+                                return false;
+                            }
+                        }
+                        nextPos = getNextPos(nextPos);
+                        DDZThreadPoolExecutor.INSTANCE.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                players[nextPos].turnCallDealer();
+                            }
+                        });
+                    }
+                } else if (tableState == Consts.TableState.RaiseDealer) {
+                    Player player = players[nextPos];
+                    if (callDealer.getPlayer().equals(player)) {
+                        if (callDealer.isCall()) {
+                            dealerId = player.getPlayerId();
+                            if (player.getCallDealerState() == Consts.CallDealerState.call) {
+                                tableState = Consts.TableState.Playing;
+                                return true;
+                            }
+                            player.setCallDealerState(Consts.CallDealerState.raise);
+                        } else {
+                            player.setCallDealerState(Consts.CallDealerState.notRaise);
+                        }
+                        nextPos = getNextPos(nextPos);
+                    }
+                }
+
+            }
+
+        }
+//        return false;
     }
 
     private void initCallDealer() {
-
+        nextPos = rd.nextInt(3);
+        tableState = Consts.TableState.CallDealer;
     }
 
     private void initTableAndPlayer() {
@@ -89,68 +147,7 @@ public class Table {
     }
 
     private void processTableOperate() {
-        try {
-            while (true) {
 
-                TableOperate operate = operateQueue.take();
-                if (operate instanceof CallDealer) {
-                    CallDealer callDealer = (CallDealer) operate;
-                    if (tableState == Consts.TableState.CallDealer) {
-                        Player player = players[nextPos];
-                        if (callDealer.getPlayer().equals(player)) {
-                            if (callDealer.isCall()) {
-                                player.setCallDealerState(Consts.CallDealerState.call);
-                                dealerId = player.getPlayerId();
-
-                                tableState = Consts.TableState.RaiseDealer;
-
-                                Player nextPlayer = players[getNextPos(this.nextPos)];
-                                if (Consts.CallDealerState.notCall == nextPlayer.getCallDealerState()) {
-                                    //最后一个叫地主
-                                    tableState = Consts.TableState.Playing;
-                                    continue;
-                                }
-                            } else {
-                                player.setCallDealerState(Consts.CallDealerState.notCall);
-
-                                Player nextPlayer = players[getNextPos(this.nextPos)];
-                                if (Consts.CallDealerState.notCall == nextPlayer.getCallDealerState()) {
-                                    //最后一个不叫
-                                    //TODO 重新发牌
-                                    continue;
-                                }
-                            }
-                            nextPos = getNextPos(nextPos);
-                            DDZThreadPoolExecutor.INSTANCE.execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    players[nextPos].turnCallDealer();
-                                }
-                            });
-                        }
-                    } else if (tableState == Consts.TableState.RaiseDealer) {
-                        Player player = players[nextPos];
-                        if (callDealer.getPlayer().equals(player)) {
-                            if (callDealer.isCall()) {
-                                dealerId = player.getPlayerId();
-                                if (player.getCallDealerState() == Consts.CallDealerState.call) {
-                                    tableState = Consts.TableState.Playing;
-                                    continue;
-                                }
-                                player.setCallDealerState(Consts.CallDealerState.raise);
-                            } else {
-                                player.setCallDealerState(Consts.CallDealerState.notRaise);
-                            }
-                            nextPos = getNextPos(nextPos);
-                        }
-                    }
-
-                }
-
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private int getNextPos(int nextPos) {
