@@ -122,6 +122,10 @@ public class Table {
                             player.setCallDealerState(Consts.CallDealerState.raise);
                         } else {
                             System.out.println(player + "不抢!");
+                            if (player.getCallDealerState() == Consts.CallDealerState.call) {
+                                tableState = Consts.TableState.Playing;
+                                return true;
+                            }
                             int beforePos=getBeforePos(currentPos);
                             if (Consts.CallDealerState.notRaise == players[beforePos].getCallDealerState()) {
                                 tableState = Consts.TableState.Playing;
