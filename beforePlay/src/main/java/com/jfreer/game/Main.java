@@ -10,7 +10,7 @@ import com.jfreer.game.ddz.Table;
  * Time: 上午11:30
  */
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         Table table = new Table();
         Player player1 = new Player(Ids.getPlayerId());
         table.joinPlayer(player1);
@@ -22,5 +22,8 @@ public class Main {
         table.joinPlayer(player3);
 
         table.restartGame();
+
+//        DDZThreadPoolExecutor.INSTANCE.shutdown();
+//        DDZThreadPoolExecutor.INSTANCE.awaitTermination(1, TimeUnit.HOURS);
     }
 }

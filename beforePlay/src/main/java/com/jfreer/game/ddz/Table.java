@@ -13,7 +13,7 @@ public class Table {
     private BlockingQueue<TableOperate> operateQueue = new LinkedBlockingQueue<TableOperate>();
     private Player[] players = new Player[3];
     private int dealerId = -1;
-    private int nextPos = -1;
+    private int currentPos = -1;
     private byte[] blowCards;
     private Consts.TableState tableState;
     private ScheduledFuture<?> future;
@@ -36,29 +36,31 @@ public class Table {
     }
 
     private void mainLoop() {
-        try {
-            /**
-             * 1.初始化参数
-             * 2.发牌
-             * 3.设置初始叫地主的玩家
-             * 4.叫地主
-             * 5.发底牌
-             * 6.地主开始出牌
-             * 7.游戏进行
-             * 8.游戏结束
-             */
-            boolean callDealerSuccess = false;
-            while (!callDealerSuccess) {
-                initTableAndPlayer();
-                publishCards();
-                initCallDealer();
-                callDealerSuccess = doCallDealer();
+        while (true) {
+            try {
+                /**
+                 * 1.初始化参数
+                 * 2.发牌
+                 * 3.设置初始叫地主的玩家
+                 * 4.叫地主
+                 * 5.发底牌
+                 * 6.地主开始出牌
+                 * 7.游戏进行
+                 * 8.游戏结束
+                 */
+                boolean callDealerSuccess = false;
+                while (!callDealerSuccess) {
+                    initTableAndPlayer();
+                    publishCards();
+                    initCallDealer();
+                    callDealerSuccess = doCallDealer();
+                }
+                System.out.println("当前地主为:" + players[currentPos]);
+                publishBlowCards();
+                playingCards();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            System.out.println("当前地主为:" + players[nextPos]);
-            publishBlowCards();
-            playingCards();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 
@@ -72,44 +74,47 @@ public class Table {
     }
 
     private boolean doCallDealer() throws InterruptedException {
-        future = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoCallDealer(players[nextPos], false), 30, TimeUnit.SECONDS);
+        DDZThreadPoolExecutor.INSTANCE.execute(new NotifyCallDealer(players[currentPos]));
+        future = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoCallDealer(players[currentPos], false), 30, TimeUnit.SECONDS);
         while (true) {
             TableOperate operate = operateQueue.take();
             if (operate instanceof CallDealer) {
                 CallDealer callDealer = (CallDealer) operate;
-                Player player = players[nextPos];
+                Player player = players[currentPos];
                 if (callDealer.getPlayer().equals(player)) {
                     if (tableState == Consts.TableState.CallDealer) {
                         stopFuture();
                         if (callDealer.isCall()) {
                             System.out.println(player + "叫地主!");
                             player.setCallDealerState(Consts.CallDealerState.call);
-                            dealerId = nextPos;
+                            dealerId = currentPos;
 
-                            tableState = Consts.TableState.RaiseDealer;
-
-                            Player nextPlayer = players[getNextPos(this.nextPos)];
+                            Player nextPlayer = players[getNextPos(this.currentPos)];
                             if (Consts.CallDealerState.notCall == nextPlayer.getCallDealerState()) {
                                 //最后一个叫地主
                                 tableState = Consts.TableState.Playing;
                                 return true;
+                            }else{
+                                tableState = Consts.TableState.RaiseDealer;
+                                System.out.println("进入抢地主状态....");
                             }
                         } else {
                             System.out.println(player + "不叫!");
                             player.setCallDealerState(Consts.CallDealerState.notCall);
 
-                            Player nextPlayer = players[getNextPos(this.nextPos)];
+                            Player nextPlayer = players[getNextPos(this.currentPos)];
                             if (Consts.CallDealerState.notCall == nextPlayer.getCallDealerState()) {
                                 return false;
                             }
                         }
-                        nextPos = getNextPos(nextPos);
-                        future = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoCallDealer(players[nextPos], false), 30, TimeUnit.SECONDS);
+                        currentPos = getNextPos(currentPos);
+                        DDZThreadPoolExecutor.INSTANCE.execute(new NotifyCallDealer(players[currentPos]));
+                        future = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoCallDealer(players[currentPos], false), 30, TimeUnit.SECONDS);
                     } else if (tableState == Consts.TableState.RaiseDealer) {
                         stopFuture();
                         if (callDealer.isCall()) {
                             System.out.println(player + "抢地主!");
-                            dealerId = nextPos;
+                            dealerId = currentPos;
                             if (player.getCallDealerState() == Consts.CallDealerState.call) {
                                 tableState = Consts.TableState.Playing;
                                 return true;
@@ -117,10 +122,25 @@ public class Table {
                             player.setCallDealerState(Consts.CallDealerState.raise);
                         } else {
                             System.out.println(player + "不抢!");
-                            player.setCallDealerState(Consts.CallDealerState.notRaise);
+                            if (Consts.CallDealerState.call == player.getCallDealerState()) {
+                                tableState = Consts.TableState.Playing;
+                                return true;
+                            } else {
+                                player.setCallDealerState(Consts.CallDealerState.notRaise);
+                            }
                         }
-                        nextPos = getNextPos(nextPos);
-                        future = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoCallDealer(players[nextPos], false), 30, TimeUnit.SECONDS);
+                        currentPos = getNextPos(currentPos);
+                        Consts.CallDealerState nextState = players[currentPos].getCallDealerState();
+                        if (nextState == Consts.CallDealerState.notCall || nextState == Consts.CallDealerState.notRaise) {
+                            CallDealer e = new CallDealer();
+                            e.setCall(false);
+                            e.setPlayer(players[currentPos]);
+                            operateQueue.add(e);
+                        } else {
+                            DDZThreadPoolExecutor.INSTANCE.execute(new NotifyCallDealer(players[currentPos]));
+                            future = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoCallDealer(players[currentPos], false), 30, TimeUnit.SECONDS);
+                        }
+
                     }
                 }
             }
@@ -136,8 +156,8 @@ public class Table {
     }
 
     private void initCallDealer() {
-        nextPos = rd.nextInt(3);
-        System.out.println("随机指定第一个叫地主的玩家:"+nextPos);
+        currentPos = rd.nextInt(3);
+        System.out.println("随机指定第一个叫地主的玩家:" + currentPos);
         tableState = Consts.TableState.CallDealer;
     }
 
@@ -146,7 +166,7 @@ public class Table {
         System.out.println("##                     ##");
         System.out.println("                         ");
         System.out.println("重置桌子参数...");
-        tableState= Consts.TableState.Init;
+        tableState = Consts.TableState.Init;
         System.out.println("重置桌上玩家参数...");
         for (Player one : players) {
             one.setCallDealerState(Consts.CallDealerState.def);
@@ -200,6 +220,19 @@ public class Table {
         @Override
         public void run() {
             Table.this.callDealer(player, call);
+        }
+    }
+
+    private class NotifyCallDealer implements Runnable {
+        private final Player player;
+
+        public NotifyCallDealer(Player player) {
+            this.player = player;
+        }
+
+        @Override
+        public void run() {
+            player.notifyCallDealer(Table.this);
         }
     }
 }

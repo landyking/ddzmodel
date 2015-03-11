@@ -1,11 +1,15 @@
 package com.jfreer.game.ddz;
 
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
 /**
  * User: landy
  * Date: 15/3/9
  * Time: 上午11:36
  */
 public class Player {
+    private static Random rd = new Random();
     private int playerId;
 
     public Player(int playerId) {
@@ -36,10 +40,16 @@ public class Player {
 
     @Override
     public String toString() {
-        return "Player:"+ playerId;
+        return "Player:" + playerId;
     }
 
-    public void turnCallDealer() {
 
+    public void notifyCallDealer(Table table) {
+        try {
+            TimeUnit.SECONDS.sleep(30);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        table.callDealer(this, rd.nextBoolean());
     }
 }
