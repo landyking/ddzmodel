@@ -55,7 +55,7 @@ public class Table {
                     initCallDealer();
                     callDealerSuccess = doCallDealer();
                 }
-                System.out.println("当前地主为:" + players[currentPos]);
+                System.out.println("当前地主为:" + players[dealerId]);
                 publishBlowCards();
                 playingCards();
             } catch (InterruptedException e) {
@@ -122,7 +122,8 @@ public class Table {
                             player.setCallDealerState(Consts.CallDealerState.raise);
                         } else {
                             System.out.println(player + "不抢!");
-                            if (Consts.CallDealerState.call == player.getCallDealerState()) {
+                            int beforePos=getBeforePos(currentPos);
+                            if (Consts.CallDealerState.notRaise == players[beforePos].getCallDealerState()) {
                                 tableState = Consts.TableState.Playing;
                                 return true;
                             } else {
@@ -149,13 +150,17 @@ public class Table {
 //        return false;
     }
 
+    private int getBeforePos(int currentPos) {
+        return (currentPos-1+players.length)%players.length;
+    }
+
     private void stopFuture() {
         if (future != null && !future.isDone()) {
             future.cancel(true);
         }
     }
 
-    private void initCallDealer() {
+     private void initCallDealer() {
         currentPos = rd.nextInt(3);
         System.out.println("随机指定第一个叫地主的玩家:" + currentPos);
         tableState = Consts.TableState.CallDealer;
