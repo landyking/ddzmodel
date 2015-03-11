@@ -6,4 +6,7 @@ package com.jfreer.game.ddz;
  * Time: 上午11:36
  */
 public class RobotPlayer extends Player {
+    public RobotPlayer(int playerId) {
+        super(playerId);
+    }
 }

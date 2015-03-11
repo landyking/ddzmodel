@@ -8,6 +8,10 @@ package com.jfreer.game.ddz;
 public class Player {
     private int playerId;
 
+    public Player(int playerId) {
+        this.playerId = playerId;
+    }
+
     private Consts.CallDealerState callDealerState = Consts.CallDealerState.def;
 
     public int getPlayerId() {
@@ -28,6 +32,11 @@ public class Player {
 
     public void setHandCards(byte[] card) {
 
+    }
+
+    @Override
+    public String toString() {
+        return "Player:"+ playerId;
     }
 
     public void turnCallDealer() {

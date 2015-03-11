@@ -10,6 +10,6 @@ public class Consts {
         Init, PublishCard, CallDealer,RaiseDealer, Playing, GameOver
     }
     public static enum CallDealerState {
-        def, call, notCall, raise, notRaise;
+        def, call, notCall, raise, notRaise, state;
     }
 }
