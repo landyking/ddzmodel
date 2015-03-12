@@ -35,14 +35,14 @@ public class Player {
     }
 
 
-    public void notifyCallDealer(Table table) {
+    public void notifyCallDealer(Table table, byte orderNo) {
         try {
 //            TimeUnit.SECONDS.sleep(30);
             TimeUnit.SECONDS.sleep(5);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        table.callDealer(this, rd.nextBoolean());
+        table.callDealer(this, rd.nextBoolean(),orderNo);
     }
 
     @Override

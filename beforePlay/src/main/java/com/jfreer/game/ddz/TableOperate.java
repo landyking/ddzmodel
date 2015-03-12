@@ -7,6 +7,15 @@ package com.jfreer.game.ddz;
  */
 public class TableOperate {
     private Player player;
+    private byte orderNo;
+
+    public byte getOrderNo() {
+        return orderNo;
+    }
+
+    public void setOrderNo(byte orderNo) {
+        this.orderNo = orderNo;
+    }
 
     public Player getPlayer() {
         return player;
