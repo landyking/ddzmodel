@@ -16,7 +16,7 @@ public class Player {
         this.playerId = playerId;
     }
 
-    private Consts.CallDealerState callDealerState = Consts.CallDealerState.def;
+    private Consts.CallDealerState callDealerState = Consts.CallDealerState.init;
 
     public int getPlayerId() {
         return playerId;
@@ -46,7 +46,8 @@ public class Player {
 
     public void notifyCallDealer(Table table) {
         try {
-            TimeUnit.SECONDS.sleep(30);
+//            TimeUnit.SECONDS.sleep(30);
+            TimeUnit.SECONDS.sleep(5);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

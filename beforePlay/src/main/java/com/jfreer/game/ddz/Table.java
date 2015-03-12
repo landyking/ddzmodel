@@ -1,5 +1,6 @@
 package com.jfreer.game.ddz;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.*;
 
@@ -18,6 +19,7 @@ public class Table {
     private Consts.TableState tableState;
     private ScheduledFuture<?> future;
     private Future<?> tableFuture;
+    private byte[] callDealerFlag = new byte[3];
 
     private void publishCards() {
         System.out.println("发牌....");
@@ -29,7 +31,6 @@ public class Table {
         }
         System.out.println("获取底牌,隐藏...");
         blowCards = cards[players.length];
-
     }
 
     public Table() {
@@ -88,22 +89,19 @@ public class Table {
                             System.out.println(player + "叫地主!");
                             player.setCallDealerState(Consts.CallDealerState.call);
                             dealerId = currentPos;
-
-                            Player nextPlayer = players[getNextPos(this.currentPos)];
-                            if (Consts.CallDealerState.notCall == nextPlayer.getCallDealerState()) {
+                            if (onlyOneCall()) {
                                 //最后一个叫地主
                                 tableState = Consts.TableState.Playing;
                                 return true;
-                            }else{
+                            } else {
                                 tableState = Consts.TableState.RaiseDealer;
                                 System.out.println("进入抢地主状态....");
                             }
                         } else {
                             System.out.println(player + "不叫!");
                             player.setCallDealerState(Consts.CallDealerState.notCall);
-
-                            Player nextPlayer = players[getNextPos(this.currentPos)];
-                            if (Consts.CallDealerState.notCall == nextPlayer.getCallDealerState()) {
+                            callDealerFlag[currentPos] = 0;
+                            if (noOtherCall()) {
                                 return false;
                             }
                         }
@@ -114,29 +112,28 @@ public class Table {
                         stopFuture();
                         if (callDealer.isCall()) {
                             System.out.println(player + "抢地主!");
+                            player.setCallDealerState(Consts.CallDealerState.raise);
                             dealerId = currentPos;
-                            if (player.getCallDealerState() == Consts.CallDealerState.call) {
+                            callDealerFlag[currentPos] = 0;
+                            if (noOtherCall()) {
+                                //最后一个叫地主
                                 tableState = Consts.TableState.Playing;
                                 return true;
                             }
-                            player.setCallDealerState(Consts.CallDealerState.raise);
                         } else {
                             System.out.println(player + "不抢!");
-                            if (player.getCallDealerState() == Consts.CallDealerState.call) {
+                            player.setCallDealerState(Consts.CallDealerState.notRaise);
+                            callDealerFlag[currentPos] = 0;
+                            if (onlyOneCall()) {
+                                //最后一个叫地主
                                 tableState = Consts.TableState.Playing;
                                 return true;
-                            }
-                            int beforePos=getBeforePos(currentPos);
-                            if (Consts.CallDealerState.notRaise == players[beforePos].getCallDealerState()) {
-                                tableState = Consts.TableState.Playing;
-                                return true;
-                            } else {
-                                player.setCallDealerState(Consts.CallDealerState.notRaise);
                             }
                         }
+
                         currentPos = getNextPos(currentPos);
-                        Consts.CallDealerState nextState = players[currentPos].getCallDealerState();
-                        if (nextState == Consts.CallDealerState.notCall || nextState == Consts.CallDealerState.notRaise) {
+
+                        if (callDealerFlag[currentPos] == 0) {
                             CallDealer e = new CallDealer();
                             e.setCall(false);
                             e.setPlayer(players[currentPos]);
@@ -154,8 +151,26 @@ public class Table {
 //        return false;
     }
 
+    private boolean noOtherCall() {
+        byte sum = currentCallNum();
+        return sum == 0;
+    }
+
+    private byte currentCallNum() {
+        byte sum = 0;
+        for (byte one : callDealerFlag) {
+            sum += one;
+        }
+        return sum;
+    }
+
+    private boolean onlyOneCall() {
+        byte sum = currentCallNum();
+        return sum == 1;
+    }
+
     private int getBeforePos(int currentPos) {
-        return (currentPos-1+players.length)%players.length;
+        return (currentPos - 1 + players.length) % players.length;
     }
 
     private void stopFuture() {
@@ -164,9 +179,9 @@ public class Table {
         }
     }
 
-     private void initCallDealer() {
+    private void initCallDealer() {
         currentPos = rd.nextInt(3);
-        System.out.println("随机指定第一个叫地主的玩家:" + currentPos);
+        System.out.println("随机指定第一个叫地主的玩家:" + players[currentPos]);
         tableState = Consts.TableState.CallDealer;
     }
 
@@ -177,8 +192,9 @@ public class Table {
         System.out.println("重置桌子参数...");
         tableState = Consts.TableState.Init;
         System.out.println("重置桌上玩家参数...");
+        Arrays.fill(callDealerFlag, (byte) 1);
         for (Player one : players) {
-            one.setCallDealerState(Consts.CallDealerState.def);
+            one.setCallDealerState(Consts.CallDealerState.init);
         }
     }
 
