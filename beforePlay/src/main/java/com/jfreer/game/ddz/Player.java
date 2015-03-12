@@ -16,7 +16,6 @@ public class Player {
         this.playerId = playerId;
     }
 
-    private Consts.CallDealerState callDealerState = Consts.CallDealerState.init;
 
     public int getPlayerId() {
         return playerId;
@@ -24,14 +23,6 @@ public class Player {
 
     public void setPlayerId(int playerId) {
         this.playerId = playerId;
-    }
-
-    public Consts.CallDealerState getCallDealerState() {
-        return callDealerState;
-    }
-
-    public void setCallDealerState(Consts.CallDealerState callDealerState) {
-        this.callDealerState = callDealerState;
     }
 
     public void setHandCards(byte[] card) {
@@ -52,5 +43,22 @@ public class Player {
             e.printStackTrace();
         }
         table.callDealer(this, rd.nextBoolean());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Player player = (Player) o;
+
+        if (playerId != player.playerId) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return playerId;
     }
 }

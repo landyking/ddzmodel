@@ -9,7 +9,4 @@ public class Consts {
     public enum TableState {
         Init, PublishCard, CallDealer,RaiseDealer, Playing, GameOver
     }
-    public static enum CallDealerState {
-        init, call, notCall, raise, notRaise
-    }
 }

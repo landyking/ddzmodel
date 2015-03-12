@@ -83,52 +83,44 @@ public class Table {
                 CallDealer callDealer = (CallDealer) operate;
                 Player player = players[currentPos];
                 if (callDealer.getPlayer().equals(player)) {
+                    boolean doWork=true;
                     if (tableState == Consts.TableState.CallDealer) {
                         stopFuture();
                         if (callDealer.isCall()) {
                             System.out.println(player + "叫地主!");
-                            player.setCallDealerState(Consts.CallDealerState.call);
                             dealerId = currentPos;
-                            if (onlyOneCall()) {
-                                //最后一个叫地主
-                                tableState = Consts.TableState.Playing;
-                                return true;
-                            } else {
-                                tableState = Consts.TableState.RaiseDealer;
-                                System.out.println("进入抢地主状态....");
-                            }
+                            tableState = Consts.TableState.RaiseDealer;
+                            //System.out.println("进入抢地主状态....");
                         } else {
                             System.out.println(player + "不叫!");
-                            player.setCallDealerState(Consts.CallDealerState.notCall);
                             callDealerFlag[currentPos] = 0;
-                            if (noOtherCall()) {
+                            if (noPlayerCall()) {
                                 return false;
                             }
                         }
-                        currentPos = getNextPos(currentPos);
-                        DDZThreadPoolExecutor.INSTANCE.execute(new NotifyCallDealer(players[currentPos]));
-                        future = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoCallDealer(players[currentPos], false), 30, TimeUnit.SECONDS);
+                        if (isDealerSure()) {
+                            //最后一个叫地主
+                            tableState = Consts.TableState.Playing;
+                            return true;
+                        }
                     } else if (tableState == Consts.TableState.RaiseDealer) {
                         stopFuture();
                         if (callDealer.isCall()) {
                             System.out.println(player + "抢地主!");
-                            player.setCallDealerState(Consts.CallDealerState.raise);
                             dealerId = currentPos;
                             callDealerFlag[currentPos] = 0;
-                            if (noOtherCall()) {
-                                //最后一个叫地主
-                                tableState = Consts.TableState.Playing;
-                                return true;
-                            }
                         } else {
                             System.out.println(player + "不抢!");
-                            player.setCallDealerState(Consts.CallDealerState.notRaise);
                             callDealerFlag[currentPos] = 0;
-                            if (onlyOneCall()) {
-                                //最后一个叫地主
-                                tableState = Consts.TableState.Playing;
-                                return true;
-                            }
+                        }
+                    }else{
+                        doWork=false;
+                    }
+                    if(doWork){
+                        if (isDealerSure()) {
+                            //最后一个叫地主
+                            tableState = Consts.TableState.Playing;
+                            return true;
                         }
 
                         currentPos = getNextPos(currentPos);
@@ -142,7 +134,6 @@ public class Table {
                             DDZThreadPoolExecutor.INSTANCE.execute(new NotifyCallDealer(players[currentPos]));
                             future = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoCallDealer(players[currentPos], false), 30, TimeUnit.SECONDS);
                         }
-
                     }
                 }
             }
@@ -151,23 +142,40 @@ public class Table {
 //        return false;
     }
 
-    private boolean noOtherCall() {
-        byte sum = currentCallNum();
-        return sum == 0;
-    }
-
-    private byte currentCallNum() {
-        byte sum = 0;
+    /**
+     * 特殊情况
+     * 所有人都不叫地主
+     * 重新发牌，重新叫地主
+     * @return
+     */
+    private boolean noPlayerCall() {
+        byte sum=0;
         for (byte one : callDealerFlag) {
-            sum += one;
+            sum+=one;
         }
-        return sum;
+        return sum==0;
     }
 
-    private boolean onlyOneCall() {
-        byte sum = currentCallNum();
-        return sum == 1;
+    /**
+     * 是否地主已确定
+     * @return
+     */
+    private boolean isDealerSure() {
+        byte sum=0;
+        for (int i = 0; i < callDealerFlag.length; i++) {
+            byte one=callDealerFlag[i];
+            sum+=one;
+        }
+        if (sum == 0) {
+            //所有人都没有叫（抢）地主机会
+            return true;
+        }else if (sum == 1 && callDealerFlag[dealerId]==1) {
+            //只有一个人有叫（抢）地主的机会，但是这个人已经是地主
+            return true;
+        }
+        return false;
     }
+
 
     private int getBeforePos(int currentPos) {
         return (currentPos - 1 + players.length) % players.length;
@@ -193,9 +201,6 @@ public class Table {
         tableState = Consts.TableState.Init;
         System.out.println("重置桌上玩家参数...");
         Arrays.fill(callDealerFlag, (byte) 1);
-        for (Player one : players) {
-            one.setCallDealerState(Consts.CallDealerState.init);
-        }
     }
 
     public void callDealer(Player player, boolean call) {
