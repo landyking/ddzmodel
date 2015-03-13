@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.jfreer.game</groupId>
-    <artifactId>ddz-beforePlay</artifactId>
+    <artifactId>ddz-playGame</artifactId>
 
 
 </project>
