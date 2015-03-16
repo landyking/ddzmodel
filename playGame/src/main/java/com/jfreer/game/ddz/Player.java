@@ -11,6 +11,11 @@ import java.util.Set;
  */
 public class Player {
     private Set<Byte> handCards = new HashSet<Byte>();
+    private int playerId;
+
+    public Set<Byte> getHandCards() {
+        return handCards;
+    }
 
     public boolean hasCards(byte[] cards) {
         for (byte b : cards) {
@@ -27,5 +32,20 @@ public class Player {
                 throw new RuntimeException("删除手牌出错!" + handCards.toString() + "," + Arrays.toString(cards));
             }
         }
+    }
+
+    public void turnToPlay(byte oldOrderNo) {
+
+    }
+
+    public void notifyPlayedCards(PlayedCards history) {
+    }
+
+    public Integer getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(int playerId) {
+        this.playerId = playerId;
     }
 }

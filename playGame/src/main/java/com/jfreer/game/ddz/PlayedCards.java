@@ -6,23 +6,23 @@ package com.jfreer.game.ddz;
  * Time: 下午5:29
  */
 public class PlayedCards {
-    private int position;
+    private int playerId;
     private byte[] cards;
 
     public PlayedCards() {
     }
 
-    public PlayedCards(int position, byte[] cards) {
-        this.position = position;
+    public PlayedCards(int playerId, byte[] cards) {
+        this.playerId = playerId;
         this.cards = cards;
     }
 
-    public int getPosition() {
-        return position;
+    public int getPlayerId() {
+        return playerId;
     }
 
-    public void setPosition(int position) {
-        this.position = position;
+    public void setPlayerId(int playerId) {
+        this.playerId = playerId;
     }
 
     public byte[] getCards() {
