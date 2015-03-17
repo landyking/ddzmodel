@@ -2,6 +2,7 @@ package com.jfreer.game.ddz;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -10,8 +11,10 @@ import java.util.Set;
  * Time: 上午11:39
  */
 public class Player {
+    protected static final Random random = new Random();
     private Set<Byte> handCards = new HashSet<Byte>();
     private int playerId;
+
 
     public Set<Byte> getHandCards() {
         return handCards;
@@ -34,7 +37,7 @@ public class Player {
         }
     }
 
-    public void turnToPlay(byte oldOrderNo) {
+    public void turnToPlay(Table table, byte oldOrderNo) {
 
     }
 

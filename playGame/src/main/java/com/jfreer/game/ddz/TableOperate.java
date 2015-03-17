@@ -24,4 +24,8 @@ public class TableOperate {
     public void setPlayer(Player player) {
         this.player = player;
     }
+
+    public void fail(String string) {
+
+    }
 }

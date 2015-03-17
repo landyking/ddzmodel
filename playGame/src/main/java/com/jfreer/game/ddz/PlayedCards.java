@@ -17,6 +17,10 @@ public class PlayedCards {
         this.cards = cards;
     }
 
+    public boolean hasCards() {
+        return cards != null && cards.length > 0;
+    }
+
     public int getPlayerId() {
         return playerId;
     }
