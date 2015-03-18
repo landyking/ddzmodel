@@ -1,9 +1,6 @@
 package com.jfreer.game.ddz;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: landy
@@ -11,12 +8,16 @@ import java.util.Set;
  * Time: 上午11:39
  */
 public class Player {
+    public Player(int playerId) {
+        this.playerId = playerId;
+    }
+
     protected static final Random random = new Random();
-    private Set<Byte> handCards = new HashSet<Byte>();
+    private LinkedList<Byte> handCards = new LinkedList<Byte>();
     private int playerId;
 
 
-    public Set<Byte> getHandCards() {
+    public List<Byte> getHandCards() {
         return handCards;
     }
 
@@ -30,7 +31,7 @@ public class Player {
     }
 
     public void removeCards(byte[] cards) {
-        for (byte b : cards) {
+        for (Byte b : cards) {
             if (!handCards.remove(b)) {
                 throw new RuntimeException("删除手牌出错!" + handCards.toString() + "," + Arrays.toString(cards));
             }
@@ -50,5 +51,10 @@ public class Player {
 
     public void setPlayerId(int playerId) {
         this.playerId = playerId;
+    }
+
+    @Override
+    public String toString() {
+        return "Player:" + playerId;
     }
 }

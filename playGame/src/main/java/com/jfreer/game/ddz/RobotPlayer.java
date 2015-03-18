@@ -8,6 +8,10 @@ import java.util.concurrent.TimeUnit;
 public class RobotPlayer extends Player {
     private PlayedCards lastHistory;
 
+    public RobotPlayer(int playerId) {
+        super(playerId);
+    }
+
     @Override
     public void turnToPlay(final Table table, final byte oldOrderNo) {
         /**

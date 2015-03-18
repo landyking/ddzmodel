@@ -26,6 +26,6 @@ public class TableOperate {
     }
 
     public void fail(String string) {
-
+        System.out.println(string);
     }
 }
