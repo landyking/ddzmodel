@@ -52,7 +52,7 @@ public class Table {
 
 
         System.out.println("牌局开始,地主"+players[currentPos]+"先出");
-        players[currentPos].turnToPlay(this, orderNo);//通知下个玩家出牌
+        players[currentPos].turnToPlay(this, orderNo,null);//通知下个玩家出牌
         //设置超时处理器
         playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
 
@@ -104,7 +104,7 @@ public class Table {
 
         currentPos = getNextPos(currentPos);
         orderNo++;
-        players[currentPos].turnToPlay(this, orderNo);//通知下个玩家出牌
+        players[currentPos].turnToPlay(this, orderNo,playedCards.getLast());//通知下个玩家出牌
         //设置超时处理器
         playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
         return true;
@@ -125,7 +125,7 @@ public class Table {
         }
         //此牌是否可以出
         //1.检查牌型是否合法
-        if (!CardChecker.isIegal(playCards.getCards())) {
+        if (!CardUtils.isIegal(playCards.getCards())) {
             playCards.fail("牌型不合法!");
             return false;
         }
@@ -146,18 +146,25 @@ public class Table {
             if (player.getHandCards().isEmpty()) {
                 System.out.println(player + "牌出完!");
                 this.tableState = TableState.gameover;
+                clearAllPlayerHandCards();
                 return true;
             }
             //6.操作位置切换为下一个
             currentPos = getNextPos(currentPos);
             orderNo++;
-            players[currentPos].turnToPlay(this, orderNo);//通知下个玩家出牌
+            players[currentPos].turnToPlay(this, orderNo,playedCards.getLast());//通知下个玩家出牌
             //设置超时处理器
             playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
             return true;
         } else {
             playCards.fail("没有上家牌大!");
             return false;
+        }
+    }
+
+    private void clearAllPlayerHandCards() {
+        for (Player one : players) {
+            one.getHandCards().clear();
         }
     }
 
@@ -168,7 +175,7 @@ public class Table {
     }
 
     private boolean isGreaterThanLast(byte[] cards) {
-        return CardChecker.isGreater(cards, playedCards.getLast().getCards());
+        return CardUtils.isGreater(cards, playedCards.getLast().getCards());
     }
 
     private void cancelPlayFuture() {
@@ -209,12 +216,12 @@ public class Table {
         public void run() {
             System.out.println(player + "超时,自动出牌!");
             if (isMaster(player)) {
-                byte[] tmp = CardChecker.getMinCards(player.getHandCards());
+                byte[] tmp = CardUtils.getMinCards(player.getHandCards());
                 if (!playCards(player, tmp, oldOrderNo)) {
                     //TODO 超时机制失败
                 }
             } else {
-                byte[] tmp = CardChecker.getCardsGreaterThan(playedCards.getLast().getCards(), player.getHandCards());
+                byte[] tmp = CardUtils.getCardsGreaterThan(playedCards.getLast().getCards(), player.getHandCards());
                 if (tmp != null && tmp.length > 0) {
                     if (!playCards(player, tmp, oldOrderNo)) {
                         //TODO 超时机制失败

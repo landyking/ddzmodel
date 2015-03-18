@@ -6,14 +6,13 @@ import java.util.concurrent.TimeUnit;
  * Created by landy on 2015/3/16.
  */
 public class RobotPlayer extends Player {
-    private PlayedCards lastHistory;
 
     public RobotPlayer(int playerId) {
         super(playerId);
     }
 
     @Override
-    public void turnToPlay(final Table table, final byte oldOrderNo) {
+    public void turnToPlay(final Table table, final byte oldOrderNo, final PlayedCards lastHistory) {
         /**
          * 出牌时机:为了更像真人,机器人的出牌延迟在5~15秒之间随机
          */
@@ -27,10 +26,10 @@ public class RobotPlayer extends Player {
                  * 如果是跟出者,则选择最小的但是比上家大的牌出,如果没有,则不出.
                  */
                 if (lastHistory == null || getPlayerId().equals(lastHistory.getPlayerId())) {
-                    byte[] minCards = CardChecker.getMinCards(getHandCards());
+                    byte[] minCards = CardUtils.getMinCards(getHandCards());
                     table.playCards(RobotPlayer.this, minCards, oldOrderNo);
                 } else {
-                    byte[] cardsGreaterThan = CardChecker.getCardsGreaterThan(lastHistory.getCards(), getHandCards());
+                    byte[] cardsGreaterThan = CardUtils.getCardsGreaterThan(lastHistory.getCards(), getHandCards());
                     if (cardsGreaterThan != null && cardsGreaterThan.length > 0) {
                         table.playCards(RobotPlayer.this, cardsGreaterThan, oldOrderNo);
                     } else {
@@ -40,15 +39,5 @@ public class RobotPlayer extends Player {
             }
         }, delay, TimeUnit.SECONDS);
 
-    }
-
-    public void notifyPlayedCards(PlayedCards history) {
-        /**
-         * 记录最后一次出牌信息.
-         * 方便判断机器人如何出牌
-         */
-        if (history.hasCards()) {
-            this.lastHistory = history;
-        }
     }
 }

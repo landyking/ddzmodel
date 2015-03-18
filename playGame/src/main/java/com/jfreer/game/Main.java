@@ -24,6 +24,9 @@ public class Main {
             System.out.println("#######################################################");
             System.out.println("#######################################################");
             table.reset();
+            player1.getHandCards().clear();
+            player2.getHandCards().clear();
+            player3.getHandCards().clear();
             LinkedList<Byte> cards = getShuffleCards();
             while (!cards.isEmpty()) {
                 player1.getHandCards().add(cards.remove());
@@ -46,7 +49,8 @@ public class Main {
 
     private static LinkedList<Byte> getShuffleCards() {
         LinkedList<Byte> cards = new LinkedList<Byte>();
-        for (byte one = 1; one <= 30; one++) {
+        int total=3*3;
+        for (byte one = 1; one <= total; one++) {
             cards.add(one);
         }
         Collections.shuffle(cards);

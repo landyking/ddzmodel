@@ -38,7 +38,7 @@ public class Player {
         }
     }
 
-    public void turnToPlay(Table table, byte oldOrderNo) {
+    public void turnToPlay(Table table, byte oldOrderNo,PlayedCards lastHistory) {
 
     }
 
