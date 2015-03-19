@@ -11,6 +11,7 @@
         <module>joinTable</module>
         <module>beforePlay</module>
         <module>playGame</module>
+        <module>cocosjs</module>
     </modules>
     <packaging>pom</packaging>
 
