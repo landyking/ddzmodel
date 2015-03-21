@@ -13,7 +13,8 @@ var StartLayer = cc.Layer.extend({
         this.bgSprite = new cc.Sprite(res.BackGround_png);
         this.bgSprite.attr({
             x:size.width/2,
-            y:size.height/2
+            y:size.height/2,
+            rotation:180
         });
         this.addChild(this.bgSprite,0);
 
