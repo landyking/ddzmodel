@@ -7,7 +7,9 @@ var res = {
     runner_plist:"res/running.plist",
     map_png:"res/map.png",
     map00_tmx:"res/map00.tmx",
-    map01_tmx:"res/map01.tmx"
+    map01_tmx:"res/map01.tmx",
+    background_png:"res/background.png",
+    background_plist:"res/background.plist"
 };
 
 var g_resources = [];

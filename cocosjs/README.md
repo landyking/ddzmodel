@@ -2,4 +2,7 @@
 cocos new -l js --no-native ${projectName}
 
 ##下一步
-http://cn.cocos2d-x.org/article/index?type=cocos2d-x&url=/doc/cocos-docs-master/manual/framework/cocos2d-js/3-jumping-into-cocos2d-js/3-6-creating-user-interaction-with-event-manager/zh.md
+http://cn.cocos2d-x.org/tutorial/show?id=1645
+
+##小贴士
+1. 使用谷歌浏览器调试时，保持《开发者工具》开启。并设置当开发者工具打开时，禁用缓存
