@@ -16,6 +16,8 @@
     "src/StatusLayer.js",
     "src/globals.js",
     "src/Coin.js",
-    "src/Rock.js"
+    "src/Rock.js",
+    "src/GameOverLayer.js",
+    "src/SimpleRecognizer.js"
   ]
 }
