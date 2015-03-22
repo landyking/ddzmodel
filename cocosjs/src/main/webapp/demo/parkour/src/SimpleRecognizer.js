@@ -15,7 +15,7 @@ SimpleRecognizer.prototype.beginPoint=function(x,y){
     this.points = [];
     this.result = "";
     this.points.push(new Point(x, y));
-}
+};
 
 SimpleRecognizer.prototype.movePoint=function(x,y) {
     this.points.push(new Point(x, y));
@@ -58,8 +58,8 @@ SimpleRecognizer.prototype.endPoint=function(){
         return "error";
     }
     return this.result;
-}
+};
 
 SimpleRecognizer.prototype.getPoints=function(){
     return this.points;
-}
+};

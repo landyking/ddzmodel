@@ -23,7 +23,7 @@ var Rock = cc.Class.extend({
         this.sprite.setBody(body);
 
         this.shape = new cp.BoxShape(body,
-            this.sprite.getContentSize().width,
+            this.sprite.getContentSize().width/3,
             this.sprite.getContentSize().height);
         this.shape.setCollisionType(SpriteTag.rock);
 
