@@ -19,6 +19,7 @@ var PlayScene = cc.Scene.extend({
         this.addChild(new StatusLayer(),0,TagOfLayer.Status);
 
         this.scheduleUpdate();
+        cc.audioEngine.playMusic(res.background_ogg, true);
     },
     initPhysics: function () {
         this.space = new cp.Space();
@@ -53,6 +54,8 @@ var PlayScene = cc.Scene.extend({
         }
     },
     collisionCoinBegin:function(arbiter,space) {
+        cc.audioEngine.playEffect(res.pickup_coin_ogg);
+
         var shapes=arbiter.getShapes();
 
         this.shapesToRemove.push(shapes[1]);
@@ -64,6 +67,7 @@ var PlayScene = cc.Scene.extend({
         cc.log("==Game Over....");
         cc.director.pause();
         this.addChild(new GameOverLayer());
+        cc.audioEngine.stopMusic();
     }
 
 });

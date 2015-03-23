@@ -24,5 +24,7 @@ var GameOverLayer = cc.Layer.extend({
     onRestart:function(sender) {
         cc.director.resume();
         cc.director.runScene(new PlayScene());
+
+        //cc.rect
     }
 });

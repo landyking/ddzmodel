@@ -7,7 +7,6 @@ if (typeof RunnerStat == "undefined") {
     RunnerStat.jumpUp = 1;
     RunnerStat.jumpDown = 2;
 }
-;
 
 var AnimationLayer = cc.Layer.extend({
     spriteSheet: null,
@@ -73,20 +72,16 @@ var AnimationLayer = cc.Layer.extend({
         statusLayer.updateMeter(this.sprite.getPositionX() - g_runnerStartX);
 
         var vel = this.body.getVel();
-        if (this.stat == RunnerStat.jumpUp) {
-            if (vel.y < 0.1) {
-                this.stat = RunnerStat.jumpDown;
-                cc.log("Change RunnerStat to jumpDown");
-                this.sprite.stopAllActions();
-                this.sprite.runAction(this.jumpDownAction);
-            }
-        } else if (this.stat == RunnerStat.jumpDown) {
-            if (vel.y == 0) {
-                this.stat = RunnerStat.running;
-                cc.log("Change RunnerStat to running");
-                this.sprite.stopAllActions();
-                this.sprite.runAction(this.runningAction);
-            }
+        if (this.stat == RunnerStat.jumpUp && vel.y < 0.1) {
+            this.stat = RunnerStat.jumpDown;
+            cc.log("Change RunnerStat to jumpDown");
+            this.sprite.stopAllActions();
+            this.sprite.runAction(this.jumpDownAction);
+        } else if (this.stat == RunnerStat.jumpDown && vel.y == 0) {
+            this.stat = RunnerStat.running;
+            cc.log("Change RunnerStat to running");
+            this.sprite.stopAllActions();
+            this.sprite.runAction(this.runningAction);
         }
     },
     initAction: function () {
@@ -150,6 +145,8 @@ var AnimationLayer = cc.Layer.extend({
     jump: function () {
         cc.log("jump");
         if (this.stat == RunnerStat.running) {
+            cc.audioEngine.playEffect(res.jump_ogg);
+
             this.body.applyImpulse(cp.v(0, 250), cp.v(0, 0));
             this.stat = RunnerStat.jumpUp;
             cc.log("Change RunnerStat to jumpUp");
