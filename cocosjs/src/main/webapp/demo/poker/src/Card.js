@@ -20,14 +20,19 @@ var Card = cc.Class.extend({
 
         this.touchListener = cc.EventListener.create({
             event: cc.EventListener.TOUCH_ONE_BY_ONE,
-            //swallowTouches: true,
-            onTouchBegan: function () {
-                return true;
+            swallowTouches: true,
+            onTouchBegan: function (touch, event) {
+                var pos = touch.getLocation();
+                var target = event.getCurrentTarget();
+                if (cc.rectContainsPoint(target.getBoundingBoxToWorld(), pos)){
+                    return true;
+                }
+                return false;
             },
             onTouchEnded: function (touch, event) {
-                var pos = parent.convertTouchToNodeSpace(touch);
+                var pos = touch.getLocation();
                 var target = event.getCurrentTarget();
-                if (cc.rectContainsPoint(target.getBoundingBox(), pos)) {
+                if (cc.rectContainsPoint(target.getBoundingBoxToWorld(), pos)) {
                     if (this._selected) {
                         target.runAction(cc.moveBy(0.2, 0, -10));
                     } else {

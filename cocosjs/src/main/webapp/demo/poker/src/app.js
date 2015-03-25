@@ -17,15 +17,15 @@ var HelloWorldLayer = cc.Layer.extend({
 
 
         /*cc.eventManager.addListener(cc.EventListener.create({
-            event: cc.EventListener.TOUCH_ONE_BY_ONE,
-            //swallowTouches: true,
-            onTouchBegan: function (touch, event) {
-                var pos = touch.getLocation();
-                var target = event.getCurrentTarget();
-                console.log(pos);
-                return true;
-            }
-        }), this);*/
+         event: cc.EventListener.TOUCH_ONE_BY_ONE,
+         //swallowTouches: true,
+         onTouchBegan: function (touch, event) {
+         var pos = touch.getLocation();
+         var target = event.getCurrentTarget();
+         console.log(pos);
+         return true;
+         }
+         }), this);*/
 
         return true;
     },
@@ -35,17 +35,19 @@ var HelloWorldLayer = cc.Layer.extend({
         var unitWidth = pokerTexture.getContentSize().width / 13;
         var unitHeight = pokerTexture.getContentSize().height / 5;
 
+        var showWidth = 20;
+
         var parent = new cc.Node();
         for (var i = 0; i < 10; i++) {
             var sprite = new cc.Sprite(cc.textureCache.getTextureForKey(res.poker_png), cc.rect(i * unitWidth, 0, unitWidth, unitHeight));
             var card = new Card(parent, sprite, i);
-            card.setPosition(cc.p(i * unitWidth, 0));
+            card.setPosition(cc.p(i * showWidth, 0));
             window.lastCard = card;
             if (window.firstCard == null) {
                 window.firstCard = card;
             }
         }
-        parent.attr({x: (size.width - 10 * unitWidth) / 2, y: size.height / 2});
+        parent.attr({x: (size.width - (9 * showWidth + unitWidth)) / 2, y: size.height / 2});
         this.addChild(parent);
     },
     onTouchBegan: function () {
