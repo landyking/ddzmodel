@@ -43,8 +43,8 @@ var HelloWorldLayer = cc.Layer.extend({
         var center=new HandCards("center",[0,3,8,9,13,21,22,40]);
         this.addChild(center);
 
-        var right=new HandCards("right",[0,3,8,9,13,21,22,40]);
-        this.addChild(right);
+        //var right=new HandCards("right",[0,3,8,9,13,21,22,40]);
+        //this.addChild(right);
     },
     onTouchBegan: function () {
         cc.log("touch began");

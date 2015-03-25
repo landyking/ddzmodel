@@ -28,24 +28,30 @@ var HandCards = cc.Node.extend({
             this._cards.push(card);
         }
 
-        this.setAnchorPoint(cc.p(0.5,0.5));
-        this.setContentSize(cc.size(l,s));
-        for(var i in this._cards) {
-            var card = this._cards[i];
-            card.setPosition(cc.p(unitWidth/2+i * this.cardGapSize, unitHeight/2));
-        }
-        console.log(cc.winSize);
         if("center"==location){
             //center
+            this.setAnchorPoint(cc.p(0.5,0.5));
+            this.setContentSize(cc.size(l,s));
+            for(var i in this._cards) {
+                var card = this._cards[i];
+                card.setPosition(cc.p(unitWidth/2+i * this.cardGapSize, unitHeight/2));
+            }
             this.setPosition(cc.p(cc.winSize.width / 2, unitHeight/2));
         }else if("right"==location){
             //right
             this.setPosition(cc.p(cc.winSize.width- unitHeight/ 2, cc.winSize.height/2));
             this.setRotation(-90);
         }else if("left"==location){
-            //right
-            this.setRotation(90);
-            this.setPosition(cc.p(unitHeight/ 2, cc.winSize.height/2));
+            //left
+            this.setAnchorPoint(cc.p(0.5,0.5));
+            this.setContentSize(cc.size(s,l));
+            for(var i in this._cards) {
+                var card = this._cards[i];
+                card.setVertical(false);
+                card.sprite.setRotation(90);
+                card.setPosition(cc.p(unitHeight/2,unitWidth/2+i * this.cardGapSize));
+            }
+            this.setPosition(cc.p(unitHeight/2,cc.winSize.height / 2));
         }
     },
     onEnter: function () {

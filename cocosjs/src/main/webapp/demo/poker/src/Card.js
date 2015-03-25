@@ -6,11 +6,15 @@ var Card = cc.Class.extend({
     _selected: false,
     _cardValue: null,
     touchListener: null,
+    _vertical:true,
     get selected() {
         return this._selected;
     },
     get cardValue() {
         return this._cardValue;
+    },
+    setVertical:function(val){
+        this._vertical=val;
     },
 
     ctor: function (parent, sprite, cardValue) {
@@ -36,7 +40,12 @@ var Card = cc.Class.extend({
                     if (me._selected) {
                         offset=-10;
                     }
-                    target.runAction(cc.moveBy(0.2, 0,offset));
+                    if(me._vertical){
+                        target.runAction(cc.moveBy(0.2, 0,offset));
+                    }else{
+                        target.runAction(cc.moveBy(0.2, offset,0));
+                    }
+
                     me._selected = !me._selected;
                 }
             }
