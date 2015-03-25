@@ -13,6 +13,7 @@
     "jsList" : [
         "src/resource.js",
         "src/app.js",
-        "src/Card.js"
+        "src/Card.js",
+        "src/HandCards.js"
     ]
 }

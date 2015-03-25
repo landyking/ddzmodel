@@ -14,10 +14,9 @@ var Card = cc.Class.extend({
     },
 
     ctor: function (parent, sprite, cardValue) {
-
         this.sprite = sprite;
         this._cardValue = cardValue;
-
+        var me=this;
         this.touchListener = cc.EventListener.create({
             event: cc.EventListener.TOUCH_ONE_BY_ONE,
             swallowTouches: true,
@@ -33,12 +32,12 @@ var Card = cc.Class.extend({
                 var pos = touch.getLocation();
                 var target = event.getCurrentTarget();
                 if (cc.rectContainsPoint(target.getBoundingBoxToWorld(), pos)) {
-                    if (this._selected) {
-                        target.runAction(cc.moveBy(0.2, 0, -10));
-                    } else {
-                        target.runAction(cc.moveBy(0.2, 0, 10));
+                    var offset=10;
+                    if (me._selected) {
+                        offset=-10;
                     }
-                    this._selected = !this._selected;
+                    target.runAction(cc.moveBy(0.2, 0,offset));
+                    me._selected = !me._selected;
                 }
             }
         });

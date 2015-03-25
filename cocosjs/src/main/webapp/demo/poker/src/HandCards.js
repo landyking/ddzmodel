@@ -3,11 +3,50 @@
  */
 var HandCards = cc.Node.extend({
     cardGapSize: 15,
-    _cardSprites: [],
+    picWidthCount:13,
+    picHeightCount:5,
+    _cards: [],
 
-    ctor: function (parent, location, cards) {
+    ctor: function (location, cards) {
         this._super();
+        var pokerTexture=cc.textureCache.getTextureForKey(res.poker_png);
+        var pkSize = pokerTexture.getContentSize();
+        var unitWidth=pkSize.width/this.picWidthCount;
+        var unitHeight=pkSize.height/this.picHeightCount;
+        var l=(cards.length-1)*this.cardGapSize+unitWidth;
+        var s=unitHeight;
 
+        /**
+         * TODO 未知牌&大小王特殊处理
+         */
+        for(var i in cards) {
+            var val = cards[i];
+            var color=val%4;
+            var cv=(val-color)/4;
+            var sprite = new cc.Sprite(pokerTexture, cc.rect(cv * unitWidth, color * unitHeight, unitWidth, unitHeight));
+            var card = new Card(this, sprite, val);
+            this._cards.push(card);
+        }
+
+        this.setAnchorPoint(cc.p(0.5,0.5));
+        this.setContentSize(cc.size(l,s));
+        for(var i in this._cards) {
+            var card = this._cards[i];
+            card.setPosition(cc.p(unitWidth/2+i * this.cardGapSize, unitHeight/2));
+        }
+        console.log(cc.winSize);
+        if("center"==location){
+            //center
+            this.setPosition(cc.p(cc.winSize.width / 2, unitHeight/2));
+        }else if("right"==location){
+            //right
+            this.setPosition(cc.p(cc.winSize.width- unitHeight/ 2, cc.winSize.height/2));
+            this.setRotation(-90);
+        }else if("left"==location){
+            //right
+            this.setRotation(90);
+            this.setPosition(cc.p(unitHeight/ 2, cc.winSize.height/2));
+        }
     },
     onEnter: function () {
         this._super();

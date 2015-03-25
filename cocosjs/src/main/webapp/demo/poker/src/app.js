@@ -30,28 +30,21 @@ var HelloWorldLayer = cc.Layer.extend({
         return true;
     },
     showPoker: function (size) {
-        var pokerTexture = cc.textureCache.addImage(res.poker_png);
+        cc.textureCache.addImage(res.poker_png);
 
-        var unitWidth = pokerTexture.getContentSize().width / 13;
-        var unitHeight = pokerTexture.getContentSize().height / 5;
+        //var center=new HandCards("center",[0,3,8,9,13,21,22,40]);
+        //this.addChild(center);
 
-        var showWidth = 20;
 
-        var parent = new cc.Node();
-        parent.setContentSize(cc.size(9 * showWidth + unitWidth, unitHeight));
-        //parent.setAnchorPoint(cc.p(0.5, 0));
-        for (var i = 0; i < 10; i++) {
-            var sprite = new cc.Sprite(cc.textureCache.getTextureForKey(res.poker_png), cc.rect(i * unitWidth, 0, unitWidth, unitHeight));
-            var card = new Card(parent, sprite, i);
-            card.setPosition(cc.p((i + 1) * showWidth, unitHeight / 2));
-            window.lastCard = card;
-            if (window.firstCard == null) {
-                window.firstCard = card;
-            }
-        }
 
-        parent.attr({x: (size.width-parent.getContentSize().width)/2, y:0});
-        this.addChild(parent);
+        var left=new HandCards("left",[0,3,8,9,13,21,22,40]);
+        this.addChild(left);
+
+        var center=new HandCards("center",[0,3,8,9,13,21,22,40]);
+        this.addChild(center);
+
+        var right=new HandCards("right",[0,3,8,9,13,21,22,40]);
+        this.addChild(right);
     },
     onTouchBegan: function () {
         cc.log("touch began");
