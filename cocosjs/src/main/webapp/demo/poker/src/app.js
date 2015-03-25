@@ -38,16 +38,19 @@ var HelloWorldLayer = cc.Layer.extend({
         var showWidth = 20;
 
         var parent = new cc.Node();
+        parent.setContentSize(cc.size(9 * showWidth + unitWidth, unitHeight));
+        //parent.setAnchorPoint(cc.p(0.5, 0));
         for (var i = 0; i < 10; i++) {
             var sprite = new cc.Sprite(cc.textureCache.getTextureForKey(res.poker_png), cc.rect(i * unitWidth, 0, unitWidth, unitHeight));
             var card = new Card(parent, sprite, i);
-            card.setPosition(cc.p(i * showWidth, 0));
+            card.setPosition(cc.p((i + 1) * showWidth, unitHeight / 2));
             window.lastCard = card;
             if (window.firstCard == null) {
                 window.firstCard = card;
             }
         }
-        parent.attr({x: (size.width - (9 * showWidth + unitWidth)) / 2, y: size.height / 2});
+
+        parent.attr({x: (size.width-parent.getContentSize().width)/2, y:0});
         this.addChild(parent);
     },
     onTouchBegan: function () {
