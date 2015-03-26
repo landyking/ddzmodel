@@ -13,6 +13,7 @@
     "src/Card.js",
     "src/HandCards.js",
     "src/Global.js",
-    "src/BelowCards.js"
+    "src/BelowCards.js",
+    "src/TimerLayer.js"
   ]
 }

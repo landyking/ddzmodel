@@ -49,7 +49,7 @@ var HelloWorldLayer = cc.Layer.extend({
         var belowCards = new BelowCards(this, [23, 34, 51]);
         belowCards.showUnknowStyle();
 
-        window.belowCards=belowCards;
+        window.belowCards = belowCards;
     }
 });
 
@@ -58,6 +58,9 @@ var HelloWorldScene = cc.Scene.extend({
         this._super();
         var layer = new HelloWorldLayer();
         this.addChild(layer);
+        var timerLayer = new TimerLayer();
+        window.timeLayer = timerLayer;
+        this.addChild(timerLayer);
     }
 });
 
