@@ -13,36 +13,36 @@ var Card = cc.Class.extend({
         return this._cardValue;
     },
 
-    ctor: function (parent, sprite, cardValue) {
+    ctor: function (parent, sprite, cardValue, needListener) {
         this.sprite = sprite;
         this._cardValue = cardValue;
-        var me=this;
-        this.touchListener = cc.EventListener.create({
-            event: cc.EventListener.TOUCH_ONE_BY_ONE,
-            swallowTouches: true,
-            onTouchBegan: function (touch, event) {
-                var pos = touch.getLocation();
-                var target = event.getCurrentTarget();
-                if (cc.rectContainsPoint(target.getBoundingBoxToWorld(), pos)){
-                    return true;
-                }
-                return false;
-            },
-            onTouchEnded: function (touch, event) {
-                var pos = touch.getLocation();
-                var target = event.getCurrentTarget();
-                if (cc.rectContainsPoint(target.getBoundingBoxToWorld(), pos)) {
-                    var offset=10;
-                    if (me._selected) {
-                        offset=-10;
+        if (needListener) {
+            this.touchListener = cc.EventListener.create({
+                event: cc.EventListener.TOUCH_ONE_BY_ONE,
+                swallowTouches: true,
+                onTouchBegan: function (touch, event) {
+                    var pos = touch.getLocation();
+                    var target = event.getCurrentTarget();
+                    if (cc.rectContainsPoint(target.getBoundingBoxToWorld(), pos)) {
+                        return true;
                     }
-                    target.runAction(cc.moveBy(0.2, 0,offset));
-                    me._selected = !me._selected;
+                    return false;
+                },
+                onTouchEnded: function (touch, event) {
+                    var pos = touch.getLocation();
+                    var target = event.getCurrentTarget();
+                    if (cc.rectContainsPoint(target.getBoundingBoxToWorld(), pos)) {
+                        var offset = 10;
+                        if (target._selected) {
+                            offset = -10;
+                        }
+                        target.runAction(cc.moveBy(0.2, 0, offset));
+                        target._selected = !target._selected;
+                    }
                 }
-            }
-        });
-        cc.eventManager.addListener(this.touchListener, this.sprite);
-
+            });
+            cc.eventManager.addListener(this.touchListener, this.sprite);
+        }
         parent.addChild(sprite);
     },
     getWidth: function () {
@@ -55,8 +55,10 @@ var Card = cc.Class.extend({
         this.sprite.setPosition(ps);
     },
     removeFromParent: function () {
-        cc.eventManager.removeListener(this.touchListener);
-        this.touchListener = null;
+        if (this.touchListener) {
+            cc.eventManager.removeListener(this.touchListener);
+            this.touchListener = null;
+        }
         this.sprite.removeFromParent();
         this.sprite = null;
     }

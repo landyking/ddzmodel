@@ -36,15 +36,15 @@ var HelloWorldLayer = cc.Layer.extend({
         //this.addChild(center);
 
 
+        var newVar = [0, 3, 8, 9,10,12, 13,18,19 ,21, 22,32, 40];
+        newVar.sort(function(a,b){return b-a;});
+        //newVar.reverse();
+        console.log(newVar);
+        var left = new HandCards(this, "left", newVar);
 
-        var left=new HandCards("left",[0,3,8,9,13,21,22,40]);
-        this.addChild(left);
+        var center = new HandCards(this, "center", newVar);
 
-        var center=new HandCards("center",[0,3,8,9,13,21,22,40]);
-        this.addChild(center);
-
-        var right=new HandCards("right",[0,3,8,9,13,21,22,40]);
-        this.addChild(right);
+        var right = new HandCards(this, "right", newVar);
     },
     onTouchBegan: function () {
         cc.log("touch began");

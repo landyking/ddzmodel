@@ -1,52 +1,52 @@
 /**
  * Created by landy on 15/3/25.
  */
-var HandCards = cc.Node.extend({
+var HandCards = cc.Class.extend({
     cardGapSize: 15,
-    picWidthCount:13,
-    picHeightCount:5,
+    picWidthCount: 13,
+    picHeightCount: 5,
     _cards: [],
+    node: null,
 
-    ctor: function (location, cards) {
-        this._super();
-        var pokerTexture=cc.textureCache.getTextureForKey(res.poker_png);
+    ctor: function (parent, location, cards) {
+        var pokerTexture = cc.textureCache.getTextureForKey(res.poker_png);
         var pkSize = pokerTexture.getContentSize();
-        var unitWidth=pkSize.width/this.picWidthCount;
-        var unitHeight=pkSize.height/this.picHeightCount;
-        var l=(cards.length-1)*this.cardGapSize+unitWidth;
-        var s=unitHeight;
+        var unitWidth = pkSize.width / this.picWidthCount;
+        var unitHeight = pkSize.height / this.picHeightCount;
+        var hcsLength = (cards.length - 1) * this.cardGapSize + unitWidth;
+        var node = new cc.Node();
+        this.node = node;
 
+        var needListener = false;
+        node.setContentSize(cc.size(hcsLength, unitHeight));
+
+        if ("center" == location) {
+            //center
+            node.setPosition((cc.winSize.width - hcsLength) / 2, 0);
+            needListener = true;
+        } else if ("right" == location) {
+            //right
+            node.setRotation(-90);
+            node.setPosition(cc.winSize.width, (cc.winSize.height - hcsLength) / 2);
+        } else if ("left" == location) {
+            //left
+            node.setRotation(90);
+            node.setPosition(0, (cc.winSize.height + hcsLength) / 2);
+        }
         /**
          * TODO 未知牌&大小王特殊处理
          */
-        for(var i in cards) {
+        for (var i in cards) {
             var val = cards[i];
-            var color=val%4;
-            var cv=(val-color)/4;
+            var color = val % 4;
+            var cv = (val - color) / 4;
             var sprite = new cc.Sprite(pokerTexture, cc.rect(cv * unitWidth, color * unitHeight, unitWidth, unitHeight));
-            var card = new Card(this, sprite, val);
+            sprite.setPosition(cc.p(unitWidth / 2 + i * this.cardGapSize, unitHeight / 2));
+            var card = new Card(node, sprite, val, needListener);
             this._cards.push(card);
         }
 
-        this.setAnchorPoint(cc.p(0.5,0.5));
-        this.setContentSize(cc.size(l,s));
-        for(var i in this._cards) {
-            var card = this._cards[i];
-            card.setPosition(cc.p(unitWidth/2+i * this.cardGapSize, unitHeight/2));
-        }
-        console.log(cc.winSize);
-        if("center"==location){
-            //center
-            this.setPosition(cc.p(cc.winSize.width / 2, unitHeight/2));
-        }else if("right"==location){
-            //right
-            this.setPosition(cc.p(cc.winSize.width- unitHeight/ 2, cc.winSize.height/2));
-            this.setRotation(-90);
-        }else if("left"==location){
-            //right
-            this.setRotation(90);
-            this.setPosition(cc.p(unitHeight/ 2, cc.winSize.height/2));
-        }
+        parent.addChild(this.node);
     },
     onEnter: function () {
         this._super();
@@ -79,5 +79,16 @@ var HandCards = cc.Node.extend({
      */
     getSelectedCards: function () {
 
+    },
+    removeFromParent: function () {
+        for (var i in this._cards) {
+            var cd = this._cards[i];
+            cd.removeFromParent();
+
+            delete this._cards[i];
+        }
+        this._cards = null;
+        this.node.removeFromParent();
+        this.node = null;
     }
 });
