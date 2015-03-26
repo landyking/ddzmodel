@@ -47,12 +47,20 @@
  *
  */
 
-cc.game.onStart = function(){
+cc.game.onStart = function () {
     cc.view.adjustViewPort(true);
     cc.view.setDesignResolutionSize(480, 320, cc.ResolutionPolicy.SHOW_ALL);
     cc.view.resizeWithBrowserSize(true);
+
     //load resources
+    var initGlobalParams = function () {
+        var pkTexture = cc.textureCache.addImage(res.poker_png);
+        Global.unitHeight = pkTexture.getContentSize().height / Global.countHeight;
+        Global.unitWidth = pkTexture.getContentSize().width / Global.countWidth;
+    };
+
     cc.LoaderScene.preload(g_resources, function () {
+        initGlobalParams();
         cc.director.runScene(new HelloWorldScene());
     }, this);
 };

@@ -9,16 +9,13 @@ var HandCards = cc.Class.extend({
     node: null,
 
     ctor: function (parent, location, cards) {
-        var pokerTexture = cc.textureCache.getTextureForKey(res.poker_png);
-        var pkSize = pokerTexture.getContentSize();
-        var unitWidth = pkSize.width / this.picWidthCount;
-        var unitHeight = pkSize.height / this.picHeightCount;
-        var hcsLength = (cards.length - 1) * this.cardGapSize + unitWidth;
+
+        var hcsLength = (cards.length - 1) * this.cardGapSize + Global.unitWidth;
         var node = new cc.Node();
         this.node = node;
 
         var needListener = false;
-        node.setContentSize(cc.size(hcsLength, unitHeight));
+        node.setContentSize(cc.size(hcsLength, Global.unitHeight));
 
         if ("center" == location) {
             //center
@@ -33,15 +30,11 @@ var HandCards = cc.Class.extend({
             node.setRotation(90);
             node.setPosition(0, (cc.winSize.height + hcsLength) / 2);
         }
-        /**
-         * TODO 未知牌&大小王特殊处理
-         */
+
         for (var i in cards) {
             var val = cards[i];
-            var color = val % 4;
-            var cv = (val - color) / 4;
-            var sprite = new cc.Sprite(pokerTexture, cc.rect(cv * unitWidth, color * unitHeight, unitWidth, unitHeight));
-            sprite.setPosition(cc.p(unitWidth / 2 + i * this.cardGapSize, unitHeight / 2));
+            var sprite = Global.createSpriteForCard(val);
+            sprite.setPosition(cc.p(Global.unitWidth / 2 + i * this.cardGapSize, Global.unitHeight / 2));
             var card = new Card(node, sprite, val, needListener);
             this._cards.push(card);
         }

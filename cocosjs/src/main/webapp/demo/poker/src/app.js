@@ -1,5 +1,4 @@
 var HelloWorldLayer = cc.Layer.extend({
-    sprite: null,
     ctor: function () {
         //////////////////////////////
         // 1. super init first
@@ -30,40 +29,27 @@ var HelloWorldLayer = cc.Layer.extend({
         return true;
     },
     showPoker: function (size) {
-        cc.textureCache.addImage(res.poker_png);
-
         //var center=new HandCards("center",[0,3,8,9,13,21,22,40]);
         //this.addChild(center);
 
 
-        var newVar = [0, 3, 8, 9,10,12, 13,18,19 ,21, 22,32, 40];
-        newVar.sort(function(a,b){return b-a;});
+        var newVar = [0, 3, 8, 9, 10, 12, 13, 18, 19, 21, 22, 32, 40];
+        newVar.sort(function (a, b) {
+            return b - a;
+        });
         //newVar.reverse();
         console.log(newVar);
-        var left = new HandCards(this, "left", newVar);
+        var unknows = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
+        var left = new HandCards(this, "left", unknows);
 
         var center = new HandCards(this, "center", newVar);
 
-        var right = new HandCards(this, "right", newVar);
-    },
-    onTouchBegan: function () {
-        cc.log("touch began");
-    },
-    cardClick: function (sender) {
-        console.log(arguments);
-    },
-    testMenu: function (size) {
-        var menuItem = new cc.MenuItemFont("hello", function () {
-            cc.log("menuItem click");
-        });
-        var menuItem2 = new cc.MenuItemFont("world", function () {
-            cc.log("menuItem2 click");
-        });
+        var right = new HandCards(this, "right", unknows);
 
-        var menu = new cc.Menu(menuItem, menuItem2);
-        menu.alignItemsVerticallyWithPadding(5);
+        var belowCards = new BelowCards(this, [23, 34, 51]);
+        belowCards.showUnknowStyle();
 
-        this.addChild(menu);
+        window.belowCards=belowCards;
     }
 });
 
