@@ -53,14 +53,8 @@ cc.game.onStart = function () {
     cc.view.resizeWithBrowserSize(true);
 
     //load resources
-    var initGlobalParams = function () {
-        var pkTexture = cc.textureCache.addImage(res.poker_png);
-        Global.unitHeight = pkTexture.getContentSize().height / Global.countHeight;
-        Global.unitWidth = pkTexture.getContentSize().width / Global.countWidth;
-    };
-
     cc.LoaderScene.preload(g_resources, function () {
-        initGlobalParams();
+        Global.init();
         cc.director.runScene(new HelloWorldScene());
     }, this);
 };
