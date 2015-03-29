@@ -1,0 +1,3 @@
+ServerResponse.playCard = function (rst) {
+
+}

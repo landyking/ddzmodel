@@ -12,6 +12,7 @@
         <module>beforePlay</module>
         <module>playGame</module>
         <module>cocosjs</module>
+        <module>websocket</module>
     </modules>
     <packaging>pom</packaging>
 
