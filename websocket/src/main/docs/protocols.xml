@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocols>
+    <protocol id="0" name="AnonymousLogin" desc="匿名登陆">
+        <req>
+            <field type="l" name="uid" desc="旧的uid,没有则为-1"/>
+        </req>
+        <resp>
+            <field type="l" name="uid" desc="服务器分配的匿名id"/>
+        </resp>
+    </protocol>
+    <protocol id="1" name="JoinTable" desc="加入桌子">
+        <req>
+            <field type="l" name="uid" desc="用户id"/>
+        </req>
+        <resp>
+            <field type="i" name="tableId" desc="桌号"/>
+            <field type="i" name="tablePos" desc="位置"/>
+            <array>
+                <field name="otherUid" type="i" desc="其他玩家id"/>
+                <field name="otherName" type="s" desc="其他玩家名字"/>
+                <field name="otherPos" type="i" desc="其他玩家位置"/>
+            </array>
+        </resp>
+    </protocol>
+</protocols>

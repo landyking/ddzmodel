@@ -1,3 +1,4 @@
+<%@ page import="java.io.File" %>
 <%--
   Created by IntelliJ IDEA.
   User: landy
@@ -15,7 +16,15 @@
     <script src="js/ws.js"></script>
     <script src="js/ServerRequest.js"></script>
     <script src="js/ServerResponse.js"></script>
-    <script src="js/response/PlayCardResponse.js"></script>
+    <%
+        String realPath = request.getServletContext().getRealPath("/js/response");
+        File dir = new File(realPath);
+        for (String f : dir.list()) {
+    %>
+    <script src="js/response/<%=f%>"></script>
+    <%
+        }
+    %>
 </head>
 <body>
 hello china!

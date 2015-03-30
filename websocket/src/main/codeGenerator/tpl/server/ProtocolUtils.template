@@ -1,10 +1,8 @@
 package gen;
 
-
-import gen.handler.AnonymousLoginHandler;
-import gen.request.AnonymousLoginReq;
-import gen.handler.JoinTableHandler;
-import gen.request.JoinTableReq;
+<%protocols.each{%>
+import gen.handler.${it.protocolName}Handler;
+import gen.request.${it.protocolName}Req;<%}%>
 
 
 import java.util.HashMap;
@@ -31,8 +29,7 @@ public class ProtocolUtils {
 
     public static final Map<Integer, Tuple> REQ_MAPPINGS = new HashMap<Integer, Tuple>();
 
-    static {
-        REQ_MAPPINGS.put(0, new Tuple(AnonymousLoginReq.class,AnonymousLoginHandler.class));
-        REQ_MAPPINGS.put(1, new Tuple(JoinTableReq.class,JoinTableHandler.class));
+    static {<%protocols.each{%>
+        REQ_MAPPINGS.put(${it.id}, new Tuple(${it.protocolName}Req.class,${it.protocolName}Handler.class));<%}%>
     }
 }

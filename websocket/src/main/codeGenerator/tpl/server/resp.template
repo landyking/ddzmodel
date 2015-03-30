@@ -1,0 +1,25 @@
+package gen.response;
+
+import com.jfreer.game.websocket.IResp;
+
+/**
+* ${desc}
+*/
+public class ${protocolName}Resp extends IResp {
+<%resp.each{%>
+    /** ${it.desc} */
+    private ${it.type} ${it.name};
+<%}%>
+    public ${protocolName}Resp() {
+        super(${id});
+    }
+<%resp.each{%>
+    public void ${it.setName}(${it.type} ${it.name}){
+        this.${it.name}=${it.name};
+    }
+
+    public ${it.type} ${it.getName}(){
+        return this.${it.name};
+    }
+<%}%>
+}

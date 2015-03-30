@@ -1,0 +1,16 @@
+package gen.handler;
+
+import com.jfreer.game.websocket.IProtocol;
+import gen.request.${protocolName}Req;
+import gen.response.${protocolName}Resp;
+
+/**
+* ${desc}
+*/
+public class ${protocolName}Handler extends IProtocol<${protocolName}Req> {
+
+    @Override
+    public void process(${protocolName}Req req) throws Exception {
+        //TODO
+    }
+}

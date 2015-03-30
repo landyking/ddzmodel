@@ -1,0 +1,12 @@
+ServerResponse = {};
+
+ServerResponse.processResponse = function (ctx,e) {
+    var parse = JSON.parse(e.data);
+    switch (parse.no) {
+        <%protocols.each{%>
+        case ${it.id}: //${it.desc}
+            ServerResponse.${it.protocolName}(ctx,parse.data);
+            break;
+        <%}%>
+    }
+}

@@ -1,0 +1,23 @@
+ServerRequest = {};
+
+ServerRequest._send = function (no, obj) {
+    ws.send(JSON.stringify({no: no, data: JSON.stringify(obj)}));
+};
+<%
+    protocols.each{
+    String params="",obj="";
+    it.req.each{
+        params+=","+it.name
+        obj+=","+it.name+":"+it.name
+    }
+    obj=obj.substring(1)
+    params=params.substring(1)
+%>
+/**
+ * ${it.desc}
+ <%it.req.each{%>* @param ${it.name}    ${it.desc}<%}%>
+ */
+ServerRequest.${it.protocolName} = function (${params}) {
+    this._send(${it.id}, {${obj}});
+};
+<%}%>

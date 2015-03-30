@@ -5,7 +5,7 @@ package com.jfreer.game.websocket;
  * Date: 15/3/29
  * Time: 下午11:34
  */
-public class ReqStruct {
+public class MsgStruct {
     private Integer no;
     private String data;
 

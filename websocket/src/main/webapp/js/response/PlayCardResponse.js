@@ -1,3 +1,0 @@
-ServerResponse.playCard = function (rst) {
-
-}

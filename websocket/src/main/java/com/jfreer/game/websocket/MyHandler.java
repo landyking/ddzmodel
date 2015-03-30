@@ -26,15 +26,17 @@ public class MyHandler extends TextWebSocketHandler {
         System.out.println(session.getId() + ":" + message.getPayload());
         //System.out.println(message.getPayload());
         try {
-            ReqStruct reqStruct = json.readValue(message.getPayload(), ReqStruct.class);
-            Integer protocolNo = reqStruct.getNo();
+            MsgStruct msgStruct = json.readValue(message.getPayload(), MsgStruct.class);
+            Integer protocolNo = msgStruct.getNo();
             if (ProtocolUtils.REQ_MAPPINGS.containsKey(protocolNo)) {
-                Class reqClazz = ProtocolUtils.REQ_MAPPINGS.get(protocolNo);
-                Class protocolClazz = ProtocolUtils.getHandlerName(reqClazz);
-                Object obj = json.readValue(reqStruct.getData(), reqClazz);
+                ProtocolUtils.Tuple tuple = ProtocolUtils.REQ_MAPPINGS.get(protocolNo);
+                Class reqClazz = tuple.getReqClass();
+                Class protocolClazz = tuple.getHandlerClass();
+                Object obj = json.readValue(msgStruct.getData(), reqClazz);
                 if (obj instanceof IReq) {
                     IProtocol protocol = (IProtocol) protocolClazz.newInstance();
-                    protocol.process(session, (IReq) obj);
+                    protocol.setSession(session);
+                    protocol.process((IReq) obj);
                 } else {
                     System.out.println(String.format("[%s] must extend [%s]!", protocolClazz.toString(), IProtocol.class.toString()));
                 }

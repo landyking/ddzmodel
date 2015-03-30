@@ -5,7 +5,7 @@ ws.onopen = function () {
 ws.onmessage = function (e) {
     console.log('message', e.data);
     if (ServerResponse) {
-        ServerResponse.processResponse(e);
+        ServerResponse.processResponse(window,e);
     }
 };
 ws.onclose = function () {

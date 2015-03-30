@@ -1,0 +1,25 @@
+package gen.request;
+
+import com.jfreer.game.websocket.IReq;
+
+/**
+* ${desc}
+*/
+public class ${protocolName}Req extends IReq {
+<%req.each{%>
+    /** ${it.desc} */
+    private ${it.type} ${it.name};
+<%}%>
+    public ${protocolName}Req() {
+        super(${id});
+    }
+<%req.each{%>
+    public void ${it.setName}(${it.type} ${it.name}){
+        this.${it.name}=${it.name};
+    }
+
+    public ${it.type} ${it.getName}(){
+        return this.${it.name};
+    }
+<%}%>
+}

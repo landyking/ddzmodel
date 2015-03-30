@@ -1,0 +1,7 @@
+/**
+ * ${desc}
+ */
+ServerResponse.${protocolName} = function (ctx,rst) {
+    console.log("Response ${protocolName}:");
+    console.log(rst);
+};

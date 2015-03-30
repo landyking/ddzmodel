@@ -58,6 +58,28 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>9.2.2.v20140723</version>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+                <version>1.5</version>
+                <!--<executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <source>${pom.basedir}/src/main/codeGenerator/generators.groovy</source>
+                        </configuration>
+                    </execution>
+                </executions>-->
+                <configuration>
+                    <scriptpath>
+                        <element>${pom.basedir}/src/main/codeGenerator</element>
+                    </scriptpath>
+                    <source>${pom.basedir}/src/main/codeGenerator/generators.groovy</source>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
