@@ -13,6 +13,7 @@
         <module>playGame</module>
         <module>cocosjs</module>
         <module>websocket</module>
+        <module>integrate</module>
     </modules>
     <packaging>pom</packaging>
 
