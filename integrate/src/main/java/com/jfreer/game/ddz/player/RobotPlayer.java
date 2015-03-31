@@ -28,7 +28,7 @@ public class RobotPlayer extends Player {
 
     @Override
     public void notifyCallDealer(Table table, byte orderNo) {
-
+        table.callDealer(this, random.nextBoolean(), orderNo);
     }
 
     @Override

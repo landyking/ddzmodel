@@ -13,8 +13,10 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
         final TableManager manager = new TableManager();
-        Player player = new TestPlayer(Ids.playerIdGen.getAndIncrement(), manager);
-        manager.joinTable(player, null);
+        for (int i = 0; i < 100; i++) {
+            Player player = new TestPlayer(Ids.playerIdGen.getAndIncrement(), manager);
+            manager.joinTable(player, null);
+        }
         //executorService.shutdown();
         //executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
     }

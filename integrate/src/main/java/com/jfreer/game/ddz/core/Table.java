@@ -125,6 +125,8 @@ public class Table {
             @Override
             public void run() {
                 boolean isException = false;
+                String oldName = Thread.currentThread().getName();
+                Thread.currentThread().setName("table-main-" + getTableId());
                 try {
                     startGame();
                     onGameOver();
@@ -144,6 +146,7 @@ public class Table {
                 if (isException) {
                     cleanTableAfterException();
                 }
+                Thread.currentThread().setName(oldName);
                 Log.info("@@@@@@@@@@@@@@@@@@@@@@@@");
             }
         });
@@ -580,6 +583,8 @@ public class Table {
     }
 
     public void leftTable(Player player) throws PlayerNotOnTheTableException {
+        int playerPos = getPlayerPos(player);
+        this.raise[playerPos] = false;
         this.removePlayer(player);
         player.afterLeftTable(this);
         Log.info(String.format("%s left table %s !", player.toString(), getTableId()));

@@ -27,6 +27,7 @@ public class TableManager {
         DDZThreadPoolExecutor.INSTANCE.execute(new Runnable() {
             @Override
             public void run() {
+                Thread.currentThread().setName("table-manager");
                 mainLoop();
             }
         });
@@ -45,6 +46,7 @@ public class TableManager {
         e.setDestTableId(destTableId);
         tableOperateQueue.add(e);
     }
+
     public void raiseHands(Player player, Integer destTableId) {
         RaiseHands e = new RaiseHands();
         e.setPlayer(player);
