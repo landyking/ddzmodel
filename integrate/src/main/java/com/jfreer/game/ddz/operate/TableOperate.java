@@ -1,12 +1,13 @@
-package com.jfreer.game.ddz;
+package com.jfreer.game.ddz.operate;
+
+import com.jfreer.game.ddz.Player;
 
 /**
  * Created by landy on 2015/3/8.
  */
-public class TableOperate {
+public class TableOperate extends IOperate {
     protected Player player;
     private Integer destTableId;
-    private Runnable callback;
     private byte orderNo;
 
     public byte getOrderNo() {
@@ -15,14 +16,6 @@ public class TableOperate {
 
     public void setOrderNo(byte orderNo) {
         this.orderNo = orderNo;
-    }
-
-    public void setCallback(Runnable callback) {
-        this.callback = callback;
-    }
-
-    public Runnable getCallback() {
-        return callback;
     }
 
     public Integer getDestTableId() {
@@ -39,9 +32,5 @@ public class TableOperate {
 
     public void setPlayer(Player player) {
         this.player = player;
-    }
-
-    public void fail(String string) {
-        System.out.println(string);
     }
 }

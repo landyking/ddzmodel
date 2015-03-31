@@ -1,4 +1,14 @@
-package com.jfreer.game.ddz;
+package com.jfreer.game.ddz.core;
+
+import com.jfreer.game.ddz.DDZThreadPoolExecutor;
+import com.jfreer.game.ddz.Ids;
+import com.jfreer.game.ddz.Log;
+import com.jfreer.game.ddz.Player;
+import com.jfreer.game.ddz.exception.DDZException;
+import com.jfreer.game.ddz.operate.JoinTable;
+import com.jfreer.game.ddz.operate.LeftTable;
+import com.jfreer.game.ddz.operate.RaiseHands;
+import com.jfreer.game.ddz.operate.TableOperate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Created by landy on 2015/3/7.
  */
 public class TableManager {
-    private BlockingQueue<TableOperate> joinOrLeftTableQueue = new LinkedBlockingQueue<TableOperate>();
+    private BlockingQueue<TableOperate> tableOperateQueue = new LinkedBlockingQueue<TableOperate>();
     private Map<Integer, Table> notFullTables = new HashMap<Integer, Table>();
     private Map<Integer, Table> allTables = new HashMap<Integer, Table>();
 
@@ -22,26 +32,31 @@ public class TableManager {
         });
     }
 
-    public void joinTable(Player player, Integer destTableId, Runnable cb) {
+    public void joinTable(Player player, Integer destTableId) {
         JoinTable e = new JoinTable();
         e.setPlayer(player);
         e.setDestTableId(destTableId);
-        e.setCallback(cb);
-        joinOrLeftTableQueue.add(e);
+        tableOperateQueue.add(e);
     }
 
-    public void leftTable(Player player, Integer destTableId, Runnable cb) {
+    public void leftTable(Player player, Integer destTableId) {
         LeftTable e = new LeftTable();
         e.setPlayer(player);
         e.setDestTableId(destTableId);
-        e.setCallback(cb);
-        joinOrLeftTableQueue.add(e);
+        tableOperateQueue.add(e);
+    }
+    public void raiseHands(Player player, Integer destTableId) {
+        RaiseHands e = new RaiseHands();
+        e.setPlayer(player);
+        e.setDestTableId(destTableId);
+        tableOperateQueue.add(e);
     }
 
     private void mainLoop() {
         while (true) {
+            TableOperate operate = null;
             try {
-                TableOperate operate = joinOrLeftTableQueue.take();
+                operate = tableOperateQueue.take();
                 if (operate instanceof JoinTable) {
                     JoinTable join = (JoinTable) operate;
                     Player player = join.getPlayer();
@@ -52,12 +67,9 @@ public class TableManager {
                             table = notFullTables.get(destTableId);
                         } else {
                             if (allTables.containsKey(destTableId)) {
-                                Log.warn(String.format("player [%s] can't join table [%s],table is full ", player.toString(), destTableId));
+                                operate.fail(String.format("player [%s] can't join table [%s],table is full ", player.toString(), destTableId));
                             } else {
-                                Log.warn(String.format("player [%s] can't join table [%s],table is not exist! ", player.toString(), destTableId));
-                            }
-                            if (join.getCallback() != null) {
-                                DDZThreadPoolExecutor.INSTANCE.execute(join.getCallback());
+                                operate.fail(String.format("player [%s] can't join table [%s],table is not exist! ", player.toString(), destTableId));
                             }
                             continue;
                         }
@@ -72,40 +84,42 @@ public class TableManager {
                     table.joinTable(player);
                     if (table.isFull()) {
                         notFullTables.remove(table.getTableId());
-                        notifyOneTableFull(table);
-                    }
-                    if (join.getCallback() != null) {
-                        DDZThreadPoolExecutor.INSTANCE.execute(join.getCallback());
                     }
                 } else if (operate instanceof LeftTable) {
                     LeftTable leftTable = (LeftTable) operate;
                     Integer destTableId = leftTable.getDestTableId();
                     if (notFullTables.containsKey(destTableId)) {
                         Table table = notFullTables.get(destTableId);
-                        if (table.containsPlayer(leftTable.getPlayer())) {
-                            table.removePlayer(leftTable.getPlayer());
-                        }
+                        table.leftTable(leftTable.getPlayer());
                         if (table.isEmpty() || table.isAllRobot()) {
-                            table.clear();
+                            table.destory();
                             notFullTables.remove(destTableId);
                             allTables.remove(destTableId);
                             Log.warn("桌子" + destTableId + "为空,回收!");
                             notifyOneTableEmpty(table);
                         }
                     } else {
+                        //TODO 当游戏没有进行时,可以退出
                         if (allTables.containsKey(destTableId)) {
-                            Log.warn("要离开的桌子" + destTableId + "已经开始游戏，暂时无法退出");
+                            operate.fail("要离开的桌子" + destTableId + "已经开始游戏，暂时无法退出");
                         } else {
-                            Log.warn("要离开的桌子不存在！");
+                            operate.fail("要离开的桌子不存在！" + destTableId);
                         }
                     }
-                    if (leftTable.getCallback() != null) {
-                        DDZThreadPoolExecutor.INSTANCE.execute(leftTable.getCallback());
+                } else if (operate instanceof RaiseHands) {
+                    if (allTables.containsKey(operate.getDestTableId())) {
+                        allTables.get(operate.getDestTableId()).raiseHands(operate.getPlayer());
+                    } else {
+                        operate.fail("桌子不存在！" + operate.getDestTableId());
                     }
                 }
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            } catch (DDZException e) {
+                if (operate != null) {
+                    operate.fail(e.getMessage());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -113,10 +127,6 @@ public class TableManager {
     }
 
     protected void notifyOneTableEmpty(Table table) {
-
-    }
-
-    protected void notifyOneTableFull(Table table) {
 
     }
 

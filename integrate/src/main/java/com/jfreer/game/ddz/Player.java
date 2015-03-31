@@ -1,15 +1,17 @@
 package com.jfreer.game.ddz;
 
+import com.jfreer.game.ddz.core.Table;
+import com.jfreer.game.ddz.exception.CardNotExistException;
+
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by landy on 2015/3/7.
  */
-public class Player {
+public abstract class Player {
     protected static final Random random = new Random();
     private final Integer playerId;
-    private Integer currentTableId;
+    private Table currentTable;
     private LinkedList<Byte> handCards = new LinkedList<Byte>();
 
     public Player(Integer playerId) {
@@ -23,6 +25,14 @@ public class Player {
 
     public Integer getPlayerId() {
         return playerId;
+    }
+
+    public Table getCurrentTable() {
+        return currentTable;
+    }
+
+    public void setCurrentTable(Table currentTable) {
+        this.currentTable = currentTable;
     }
 
     @Override
@@ -42,23 +52,8 @@ public class Player {
         return playerId != null ? playerId.hashCode() : 0;
     }
 
-    public void setCurrentTableId(Integer currentTableId) {
-        this.currentTableId = currentTableId;
-    }
 
-    public Integer getCurrentTableId() {
-        return currentTableId;
-    }
-
-    public void notifyCallDealer(Table table, byte orderNo) {
-        try {
-//            TimeUnit.SECONDS.sleep(30);
-            TimeUnit.SECONDS.sleep(5);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        table.callDealer(this, random.nextBoolean(), orderNo);
-    }
+    public abstract void notifyCallDealer(Table table, byte orderNo);
 
     public void addHandCards(byte[] card) {
         for (byte one : card) {
@@ -80,23 +75,32 @@ public class Player {
         return true;
     }
 
-    public void removeCards(byte[] cards) {
+    public void removeCards(byte[] cards) throws CardNotExistException {
         for (Byte b : cards) {
             if (!handCards.remove(b)) {
-                throw new RuntimeException("删除手牌出错!" + handCards.toString() + "," + Arrays.toString(cards));
+                throw new CardNotExistException(this.toString(), b);
             }
         }
     }
 
-    public void turnToPlay(Table table, byte oldOrderNo, HistoryCards lastHistory) {
+    public abstract void turnToPlay(Table table, byte oldOrderNo, HistoryCards lastHistory);
 
+    public abstract void notifyPlayedCards(HistoryCards history);
+
+
+    public void afterJoinTable(Table table) {
+        Log.info(String.format("%s join table %s !", this.toString(), table.getTableId()));
     }
 
-    public void notifyPlayedCards(HistoryCards history) {
-    }
+    public abstract void afterTableFull(Table table);
 
-    public void clear() {
+    public void afterGameOver(Table table) {
         this.getHandCards().clear();
-        this.currentTableId = null;
     }
+
+    public void afterLeftTable(Table table) {
+        this.currentTable = null;
+        this.getHandCards().clear();
+    }
+
 }

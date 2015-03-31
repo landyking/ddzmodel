@@ -1,19 +1,36 @@
-package com.jfreer.game.ddz;
+package com.jfreer.game.ddz.player;
+
+import com.jfreer.game.ddz.CardUtils;
+import com.jfreer.game.ddz.DDZThreadPoolExecutor;
+import com.jfreer.game.ddz.HistoryCards;
+import com.jfreer.game.ddz.Player;
+import com.jfreer.game.ddz.core.Table;
+import com.jfreer.game.ddz.core.TableManager;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * Created by landy on 2015/3/7.
  */
-public class RobotPlayer extends Player{
-    public RobotPlayer(Integer playerId) {
+public class RobotPlayer extends Player {
+
+    private final TableManager tableManager;
+
+    public RobotPlayer(Integer playerId, TableManager tableManager) {
         super(playerId);
+        this.tableManager = tableManager;
     }
 
     @Override
     public String toString() {
-        return "Robot:"+this.getPlayerId();
+        return "Robot:" + this.getPlayerId();
     }
+
+    @Override
+    public void notifyCallDealer(Table table, byte orderNo) {
+
+    }
+
     @Override
     public void turnToPlay(final Table table, final byte oldOrderNo, final HistoryCards lastHistory) {
         /**
@@ -41,6 +58,28 @@ public class RobotPlayer extends Player{
                 }
             }
         }, delay, TimeUnit.SECONDS);
+
+    }
+
+    @Override
+    public void notifyPlayedCards(HistoryCards history) {
+
+    }
+
+    @Override
+    public void afterJoinTable(Table table) {
+        super.afterJoinTable(table);
+        this.tableManager.raiseHands(this, table.getTableId());
+    }
+
+    @Override
+    public void afterGameOver(Table table) {
+        super.afterGameOver(table);
+        this.tableManager.raiseHands(this,table.getTableId());
+    }
+
+    @Override
+    public void afterTableFull(Table table) {
 
     }
 }

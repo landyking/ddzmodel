@@ -1,4 +1,12 @@
-package com.jfreer.game.ddz;
+package com.jfreer.game.ddz.core;
+
+import com.jfreer.game.ddz.*;
+import com.jfreer.game.ddz.exception.CardNotExistException;
+import com.jfreer.game.ddz.exception.DDZException;
+import com.jfreer.game.ddz.exception.PlayerNotOnTheTableException;
+import com.jfreer.game.ddz.exception.TableAlreadyFullException;
+import com.jfreer.game.ddz.operate.*;
+import com.jfreer.game.ddz.player.RobotPlayer;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -12,18 +20,18 @@ public class Table {
     public static final int PLAY_TIME_OUT = 30;
     private Integer tableId;
     private Player[] players = new Player[3];
+    private boolean[] raise = new boolean[3];
     private TableManager tableManager;
     private int dealerPos = -1;
     private int currentPos = -1;
     private byte[] belowCards;
     private Consts.TableState tableState;
-    private ScheduledFuture<?> future;
-    private Future<?> tableFuture;
     private ScheduledFuture<?> playFuture;
+    private Future<?> tableFuture;
     private byte[] callDealerFlag = new byte[3];
     private byte orderNo = 1;
     private Random rd = new Random();
-    private BlockingQueue<TableOperate> operateQueue = new LinkedBlockingQueue<TableOperate>();
+    private BlockingQueue<IOperate> operateQueue = new LinkedBlockingQueue<IOperate>();
     private LinkedList<HistoryCards> historyCards = new LinkedList<HistoryCards>();
 
     public Table(Integer tableId, TableManager tableManager) {
@@ -40,8 +48,8 @@ public class Table {
         return true;
     }
 
-    public void joinTable(Player player) {
-        stopFuture();
+    void joinTable(Player player) throws TableAlreadyFullException {
+        stopPlayFuture();
         boolean addSuccess = false;
         for (int i = 0; i < players.length; i++) {
             if (players[i] == null) {
@@ -51,23 +59,53 @@ public class Table {
             }
         }
         if (!addSuccess) {
-            throw new RuntimeException("table is full!!!");
+            throw new TableAlreadyFullException(this.getTableId());
         }
 
-        player.setCurrentTableId(getTableId());
-        System.out.println(String.format("%s join table %s !", player.toString(), getTableId()));
+        player.setCurrentTable(this);
+
+        player.afterJoinTable(this);
         if (!isFull()) {
-            future = DDZThreadPoolExecutor.INSTANCE.schedule(new Runnable() {
+            playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new Runnable() {
                 @Override
                 public void run() {
-                    RobotPlayer robot = new RobotPlayer(Ids.playerIdGen.getAndIncrement());
-                    tableManager.joinTable(robot, tableId, null);
+                    RobotPlayer robot = new RobotPlayer(Ids.playerIdGen.getAndIncrement(), tableManager);
+                    tableManager.joinTable(robot, tableId);
                 }
             }, (3 - playerCount()) * 10, TimeUnit.SECONDS);
         } else {
-            restartGame();
+            for (Player one : players) {
+                one.afterTableFull(this);
+            }
         }
 
+    }
+
+    void raiseHands(Player player) throws PlayerNotOnTheTableException {
+        int pos = getPlayerPos(player);
+        this.raise[pos] = true;
+        Log.info(player.toString() + " raise hands!");
+        if (isAllRaise()) {
+            restartGame();
+        }
+    }
+
+    private boolean isAllRaise() {
+        for (boolean one : this.raise) {
+            if (!one) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int getPlayerPos(Player player) throws PlayerNotOnTheTableException {
+        for (int i = 0; i < players.length; i++) {
+            if (player.equals(players[i])) {
+                return i;
+            }
+        }
+        throw new PlayerNotOnTheTableException(player.toString(), this.getTableId());
     }
 
     private int playerCount() {
@@ -82,16 +120,45 @@ public class Table {
 
     public void restartGame() {
         stopTableFuture();
-        tableFuture = DDZThreadPoolExecutor.INSTANCE.submit(new Callable<Void>() {
+
+        tableFuture = DDZThreadPoolExecutor.INSTANCE.submit(new Runnable() {
             @Override
-            public Void call() throws Exception {
-                startGame();
-                return null;
+            public void run() {
+                boolean isException = false;
+                try {
+                    startGame();
+                    onGameOver();
+                } catch (InterruptedException e) {
+                    //TODO
+                    e.printStackTrace();
+                    isException = true;
+                } catch (DDZException e) {
+                    //TODO
+                    e.printStackTrace();
+                    isException = true;
+                } catch (Exception e) {
+                    //TODO
+                    e.printStackTrace();
+                    isException = true;
+                }
+                if (isException) {
+                    cleanTableAfterException();
+                }
+                Log.info("@@@@@@@@@@@@@@@@@@@@@@@@");
             }
         });
     }
 
-    private void startGame() throws InterruptedException {
+    /**
+     * TODO
+     * 如果执行过程出现未知异常
+     * 记录下异常信息,将该桌所有玩家离桌,然后强制下线(暂定方案)
+     */
+    private void cleanTableAfterException() {
+
+    }
+
+    private void startGame() throws InterruptedException, DDZException {
         /**
          * 1.初始化参数
          * 2.发牌
@@ -109,29 +176,29 @@ public class Table {
             initCallDealer();
             callDealerSuccess = doCallDealer();
         }
-        System.out.println("当前地主为:" + players[dealerPos]);
+        Log.info("当前地主为:" + players[dealerPos]);
         publishBlowCards();
         startPlaying();
     }
 
 
     private void publishBlowCards() {
-        System.out.println("给地主发底牌...");
+        Log.info("给地主发底牌...");
         players[dealerPos].addHandCards(this.belowCards);
         for (Player one : players) {
-            System.out.println(one.toString() + ":" + one.getHandCards());
+            Log.info(one.toString() + ":" + one.getHandCards());
         }
     }
 
     private boolean doCallDealer() throws InterruptedException {
-        DDZThreadPoolExecutor.INSTANCE.execute(new NotifyCallDealer(players[currentPos], orderNo));
-        future = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoCallDealer(players[currentPos], false, orderNo), 30, TimeUnit.SECONDS);
+        players[currentPos].notifyCallDealer(this, orderNo);
+        playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoCallDealer(players[currentPos], false, orderNo), 30, TimeUnit.SECONDS);
         while (true) {
-            TableOperate operate = operateQueue.take();
+            IOperate operate = operateQueue.take();
             if (operate instanceof CallDealer) {
                 CallDealer callDealer = (CallDealer) operate;
                 if (callDealer.getOrderNo() != this.orderNo) {
-                    System.out.println("orderNo is error!" + callDealer.getOrderNo());
+                    Log.info("orderNo is error!" + callDealer.getOrderNo());
                     continue;
                 } else {
                     this.orderNo++;
@@ -140,14 +207,14 @@ public class Table {
                 if (callDealer.getPlayer().equals(player)) {
                     boolean doWork = true;
                     if (tableState == Consts.TableState.CallDealer) {
-                        stopFuture();
+                        stopPlayFuture();
                         if (callDealer.isCall()) {
-                            System.out.println(player + "叫地主!" + callDealer.getOrderNo());
+                            Log.info(player + "叫地主!" + callDealer.getOrderNo());
                             dealerPos = currentPos;
                             tableState = Consts.TableState.RaiseDealer;
-                            //System.out.println("进入抢地主状态....");
+                            //Log.info("进入抢地主状态....");
                         } else {
-                            System.out.println(player + "不叫!" + callDealer.getOrderNo());
+                            Log.info(player + "不叫!" + callDealer.getOrderNo());
                             callDealerFlag[currentPos] = 0;
                             if (noPlayerCall()) {
                                 return false;
@@ -159,13 +226,13 @@ public class Table {
                             return true;
                         }
                     } else if (tableState == Consts.TableState.RaiseDealer) {
-                        stopFuture();
+                        stopPlayFuture();
                         if (callDealer.isCall()) {
-                            System.out.println(player + "抢地主!" + callDealer.getOrderNo());
+                            Log.info(player + "抢地主!" + callDealer.getOrderNo());
                             dealerPos = currentPos;
                             callDealerFlag[currentPos] = 0;
                         } else {
-                            System.out.println(player + "不抢!" + callDealer.getOrderNo());
+                            Log.info(player + "不抢!" + callDealer.getOrderNo());
                             callDealerFlag[currentPos] = 0;
                         }
                     } else {
@@ -187,8 +254,8 @@ public class Table {
                             e.setPlayer(players[currentPos]);
                             operateQueue.add(e);
                         } else {
-                            DDZThreadPoolExecutor.INSTANCE.execute(new NotifyCallDealer(players[currentPos], orderNo));
-                            future = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoCallDealer(players[currentPos], false, orderNo), 30, TimeUnit.SECONDS);
+                            players[currentPos].notifyCallDealer(this, orderNo);
+                            playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoCallDealer(players[currentPos], false, orderNo), 30, TimeUnit.SECONDS);
                         }
                     }
                 }
@@ -202,30 +269,30 @@ public class Table {
         return (nextPos + 1) % players.length;
     }
 
-    private void stopFuture() {
-        if (future != null && !future.isDone()) {
-            future.cancel(true);
+    private void stopPlayFuture() {
+        if (playFuture != null && !playFuture.isDone()) {
+            playFuture.cancel(true);
         }
     }
 
     private void initCallDealer() {
         currentPos = rd.nextInt(3);
-        System.out.println("随机指定第一个叫地主的玩家:" + players[currentPos]);
+        Log.info("随机指定第一个叫地主的玩家:" + players[currentPos]);
         tableState = Consts.TableState.CallDealer;
     }
 
     private void publishCards() {
-        System.out.println("发牌....");
+        Log.info("发牌....");
         tableState = Consts.TableState.PublishCard;
-        System.out.println("发玩家手牌....");
+        Log.info("发玩家手牌....");
         byte[][] cards = CardUtils.getTableCards(this);
         for (int i = 0; i < players.length; i++) {
             players[i].addHandCards(cards[i]);
-            System.out.println(players[i].toString() + ":" + players[i].getHandCards());
+            Log.info(players[i].toString() + ":" + players[i].getHandCards());
         }
-        System.out.println("获取底牌,隐藏...");
+        Log.info("获取底牌,隐藏...");
         belowCards = cards[players.length];
-        System.out.println("below cards:" + Arrays.toString(belowCards));
+        Log.info("below cards:" + Arrays.toString(belowCards));
     }
 
     public boolean playCards(Player player, byte[] cards, byte orderNo) {
@@ -244,26 +311,28 @@ public class Table {
     }
 
     private void initTableAndPlayer() {
-        System.out.println("#########################");
-        System.out.println("##                     ##");
-        System.out.println("                         ");
-        System.out.println("重置桌子参数...");
+        Log.info("#########################");
+        Log.info("重置桌子参数...");
+        stopPlayFuture();
         this.tableState = Consts.TableState.Init;
         this.orderNo = 1;
-        System.out.println("重置桌上玩家参数...");
+        Log.info("重置桌上玩家参数...");
         Arrays.fill(this.callDealerFlag, (byte) 1);
+        for (Player one : players) {
+            one.getHandCards().clear();
+        }
     }
 
-    public void startPlaying() throws InterruptedException {
+    public void startPlaying() throws InterruptedException, DDZException {
 
         currentPos = dealerPos;
-        System.out.println("牌局开始,地主" + players[currentPos] + "先出");
+        Log.info("牌局开始,地主" + players[currentPos] + "先出");
         players[currentPos].turnToPlay(this, orderNo, null);//通知下个玩家出牌
         //设置超时处理器
         playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
 
-        while (tableState == Consts.TableState.Playing) {
-            TableOperate operate = operateQueue.take();
+        while (tableState != Consts.TableState.GameOver) {
+            IOperate operate = operateQueue.take();
             if (operate instanceof PlayCards) {
                 PlayCards playCards = (PlayCards) operate;
                 //出牌
@@ -290,47 +359,46 @@ public class Table {
 
             }
         }
-        System.out.println("牌局结束!");
+        Log.info("牌局结束!");
     }
 
     /**
      * 处理出牌
      *
-     * @param playCards
+     * @param operate
      * @param player
      */
-    private boolean processPlayCards(PlayCards playCards, Player player) {
+    private boolean processPlayCards(PlayCards operate, Player player) throws CardNotExistException {
         //玩家是否有此牌
         //1.检查玩家手牌中是否包含要出的牌
-        if (!player.hasCards(playCards.getCards())) {
-            playCards.fail("要出的牌不存在!");
+        if (!player.hasCards(operate.getCards())) {
+            operate.fail("要出的牌不存在!");
             return false;
         }
         //此牌是否可以出
         //1.检查牌型是否合法
-        if (!CardUtils.isIegal(playCards.getCards())) {
-            playCards.fail("牌型不合法!");
+        if (!CardUtils.isIegal(operate.getCards())) {
+            operate.fail("牌型不合法!");
             return false;
         }
         //2.如果是跟出,则检查是否比被跟的牌大.
-        if (isMaster(player) || isGreaterThanLast(playCards.getCards())) {
-            System.out.println(player + "出牌:" + Arrays.toString(playCards.getCards()));
+        if (isMaster(player) || isGreaterThanLast(operate.getCards())) {
+            Log.info(player + "出牌:" + Arrays.toString(operate.getCards()));
             //如果可以出
             //1.取消超时操作
-            cancelPlayFuture();
+            stopPlayFuture();
             //2.从手牌中移除此牌
-            player.removeCards(playCards.getCards());
-            System.out.println(player + ":" + player.getHandCards());
+            player.removeCards(operate.getCards());
+            Log.info(player + ":" + player.getHandCards());
             //3.设置上次出牌玩家为当前用户
-            HistoryCards history = new HistoryCards(player.getPlayerId(), playCards.getCards());
+            HistoryCards history = new HistoryCards(player.getPlayerId(), operate.getCards());
             historyCards.addLast(history);
             //4.通知所有玩家出牌信息
             notifyAllPlayer(history);
             //5.检查该玩家的牌是否出完,出完则gameover
             if (player.getHandCards().isEmpty()) {
-                System.out.println(player + "牌出完!");
+                Log.info(player + "牌出完!");
                 this.tableState = Consts.TableState.GameOver;
-                clearAllPlayerHandCards();
                 return true;
             }
             //6.操作位置切换为下一个
@@ -341,15 +409,21 @@ public class Table {
             playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
             return true;
         } else {
-            playCards.fail("没有上家牌大!");
+            operate.fail("没有上家牌大!");
             return false;
         }
     }
 
-    private void clearAllPlayerHandCards() {
+    private void onGameOver() {
+        //取消所有的举手
+        Arrays.fill(this.raise, false);
+        //通知每个玩家游戏结束
+        //TODO 计算游戏结果,将结果通知每个玩家
         for (Player one : players) {
-            one.getHandCards().clear();
+            one.afterGameOver(this);
         }
+        this.operateQueue.clear();
+        this.historyCards.clear();
     }
 
     private boolean processPlayNothing(PlayNothing playNothing, Player player) {
@@ -359,12 +433,12 @@ public class Table {
             playNothing.fail("必须出牌!");
             return false;
         }
-        System.out.println(player + "不出牌");
+        Log.info(player + "不出牌");
         //如果不出
         //1.取消超时操作
         //2.通知所有玩家,不出
         //3.操作位置切换为下一个
-        cancelPlayFuture();
+        stopPlayFuture();
         notifyAllPlayer(new HistoryCards(player.getPlayerId(), null));
 
         currentPos = getNextPos(currentPos);
@@ -385,12 +459,6 @@ public class Table {
         return CardUtils.isGreater(cards, historyCards.getLast().getCards());
     }
 
-    private void cancelPlayFuture() {
-        if (playFuture != null && !playFuture.isDone()) {
-            playFuture.cancel(true);
-        }
-    }
-
     private boolean isMaster(Player player) {
         return historyCards.isEmpty() || player.getPlayerId().equals(historyCards.getLast().getPlayerId());
     }
@@ -399,16 +467,17 @@ public class Table {
         return tableId;
     }
 
-    public void removePlayer(Player player) {
+    private void removePlayer(Player player) throws PlayerNotOnTheTableException {
         for (int i = 0; i < players.length; i++) {
             if (player.equals(players[i])) {
                 players[i] = null;
+                return;
             }
         }
-        System.out.println(String.format("%s left table %s !", player.toString(), getTableId()));
+        throw new PlayerNotOnTheTableException(player.toString(), this.getTableId());
     }
 
-    public boolean containsPlayer(Player player) {
+    private boolean containsPlayer(Player player) {
         for (int i = 0; i < players.length; i++) {
             if (player.equals(players[i])) {
                 return true;
@@ -437,16 +506,27 @@ public class Table {
         return true;
     }
 
-    public void clear() {
-        //TODO
+    /**
+     * 销毁桌子,对其包含的信息进行清理
+     * 当桌子上无人,或者只有机器人时会执行此操作
+     */
+    public void destory() {
+        stopPlayFuture();
+        stopTableFuture();
+        tableManager = null;
+        operateQueue.clear();
+        historyCards.clear();
         for (int i = 0; i < players.length; i++) {
             if (players[i] != null) {
-                players[i].clear();
+                try {
+                    this.leftTable(players[i]);
+                } catch (PlayerNotOnTheTableException e) {
+                    e.printStackTrace();
+                }
                 players[i] = null;
             }
         }
-        stopFuture();
-        stopTableFuture();
+
     }
 
     private void stopTableFuture() {
@@ -455,12 +535,12 @@ public class Table {
         }
     }
 
-    public void callDealer(Player player, boolean call, byte orderNo) {
+    public boolean callDealer(Player player, boolean call, byte orderNo) {
         CallDealer e = new CallDealer();
         e.setPlayer(player);
         e.setCall(call);
         e.setOrderNo(orderNo);
-        boolean success = operateQueue.add(e);
+        return operateQueue.add(e);
     }
 
     /**
@@ -499,6 +579,13 @@ public class Table {
         return false;
     }
 
+    public void leftTable(Player player) throws PlayerNotOnTheTableException {
+        this.removePlayer(player);
+        player.afterLeftTable(this);
+        Log.info(String.format("%s left table %s !", player.toString(), getTableId()));
+    }
+
+
     private class AutoCallDealer implements Runnable {
 
         private final Player player;
@@ -517,20 +604,6 @@ public class Table {
         }
     }
 
-    private class NotifyCallDealer implements Runnable {
-        private final Player player;
-        private final byte orderNo;
-
-        public NotifyCallDealer(Player player, byte orderNo) {
-            this.player = player;
-            this.orderNo = orderNo;
-        }
-
-        @Override
-        public void run() {
-            player.notifyCallDealer(Table.this, this.orderNo);
-        }
-    }
 
     private class AutoPlay implements Runnable {
         private final Player player;
@@ -543,7 +616,7 @@ public class Table {
 
         @Override
         public void run() {
-            System.out.println(player + "超时,自动出牌!");
+            Log.info(player + "超时,自动出牌!");
             if (isMaster(player)) {
                 byte[] tmp = CardUtils.getMinCards(player.getHandCards());
                 if (!playCards(player, tmp, oldOrderNo)) {

@@ -1,5 +1,7 @@
 package com.jfreer.game.ddz;
 
+import com.jfreer.game.ddz.core.Table;
+
 import java.util.*;
 
 /**
@@ -8,6 +10,11 @@ import java.util.*;
  * Time: 下午5:31
  */
 public class CardUtils {
+
+    public static final int TOTAL_CARD_COUNT = 24;
+    public static final int BELOW_CARD_COUNT = 3;
+    public static final int PER_CARD_COUNT = (TOTAL_CARD_COUNT - BELOW_CARD_COUNT) / 3;
+
     /**
      * TODO 是否是合法的牌型
      *
@@ -26,7 +33,7 @@ public class CardUtils {
      * @return
      */
     public static boolean isGreater(byte[] now, byte[] last) {
-        return now[0]/4 > last[0]/4;
+        return now[0] / 4 > last[0] / 4;
     }
 
     /**
@@ -60,14 +67,14 @@ public class CardUtils {
 
     public static byte[][] getTableCards(Table table) {
         LinkedList<Byte> all = new LinkedList<Byte>();
-        for (int i = 0; i < 54; i++) {
+        for (int i = 0; i < TOTAL_CARD_COUNT; i++) {
             all.add((byte) i);
         }
         Collections.shuffle(all);
         Deque<Byte> stack = all;
-        byte[][] result = new byte[][]{new byte[17], new byte[17], new byte[17], new byte[3]};
+        byte[][] result = new byte[][]{new byte[PER_CARD_COUNT], new byte[PER_CARD_COUNT], new byte[PER_CARD_COUNT], new byte[BELOW_CARD_COUNT]};
         int i = 0;
-        while (stack.size() > 3) {
+        while (stack.size() > BELOW_CARD_COUNT) {
             result[0][i] = stack.pop();
             result[1][i] = stack.pop();
             result[2][i] = stack.pop();

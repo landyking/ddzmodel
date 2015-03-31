@@ -1,4 +1,4 @@
-package com.jfreer.game.ddz;
+package com.jfreer.game.ddz.operate;
 
 /**
  * User: landy
