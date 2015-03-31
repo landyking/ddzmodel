@@ -5,14 +5,14 @@ package com.jfreer.game.ddz;
  * Date: 15/3/16
  * Time: 下午5:29
  */
-public class PlayedCards {
+public class HistoryCards {
     private int playerId;
     private byte[] cards;
 
-    public PlayedCards() {
+    public HistoryCards() {
     }
 
-    public PlayedCards(int playerId, byte[] cards) {
+    public HistoryCards(int playerId, byte[] cards) {
         this.playerId = playerId;
         this.cards = cards;
     }

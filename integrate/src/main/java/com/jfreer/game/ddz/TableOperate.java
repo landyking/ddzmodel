@@ -16,6 +16,7 @@ public class TableOperate {
     public void setOrderNo(byte orderNo) {
         this.orderNo = orderNo;
     }
+
     public void setCallback(Runnable callback) {
         this.callback = callback;
     }
@@ -31,11 +32,16 @@ public class TableOperate {
     public void setDestTableId(Integer destTableId) {
         this.destTableId = destTableId;
     }
+
     public Player getPlayer() {
         return player;
     }
 
     public void setPlayer(Player player) {
         this.player = player;
+    }
+
+    public void fail(String string) {
+        System.out.println(string);
     }
 }

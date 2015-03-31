@@ -1,15 +1,16 @@
 package com.jfreer.game.ddz;
 
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Created by landy on 2015/3/7.
  */
 public class Player {
-    private static Random rd = new Random();
-    private Integer playerId;
+    protected static final Random random = new Random();
+    private final Integer playerId;
     private Integer currentTableId;
+    private LinkedList<Byte> handCards = new LinkedList<Byte>();
 
     public Player(Integer playerId) {
         this.playerId = playerId;
@@ -56,10 +57,46 @@ public class Player {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        table.callDealer(this, rd.nextBoolean(), orderNo);
+        table.callDealer(this, random.nextBoolean(), orderNo);
     }
 
-    public void setHandCards(byte[] card) {
+    public void addHandCards(byte[] card) {
+        for (byte one : card) {
+            this.handCards.add(one);
+        }
+        Collections.sort(this.handCards);
+    }
 
+    public List<Byte> getHandCards() {
+        return handCards;
+    }
+
+    public boolean hasCards(byte[] cards) {
+        for (byte b : cards) {
+            if (!handCards.contains(b)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void removeCards(byte[] cards) {
+        for (Byte b : cards) {
+            if (!handCards.remove(b)) {
+                throw new RuntimeException("删除手牌出错!" + handCards.toString() + "," + Arrays.toString(cards));
+            }
+        }
+    }
+
+    public void turnToPlay(Table table, byte oldOrderNo, HistoryCards lastHistory) {
+
+    }
+
+    public void notifyPlayedCards(HistoryCards history) {
+    }
+
+    public void clear() {
+        this.getHandCards().clear();
+        this.currentTableId = null;
     }
 }

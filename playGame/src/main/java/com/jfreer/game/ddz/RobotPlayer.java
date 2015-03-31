@@ -12,7 +12,7 @@ public class RobotPlayer extends Player {
     }
 
     @Override
-    public void turnToPlay(final Table table, final byte oldOrderNo, final PlayedCards lastHistory) {
+    public void turnToPlay(final Table table, final byte oldOrderNo, final HistoryCards lastHistory) {
         /**
          * 出牌时机:为了更像真人,机器人的出牌延迟在5~15秒之间随机
          */

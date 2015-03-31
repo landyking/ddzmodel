@@ -15,7 +15,7 @@ public class Table {
     private int currentPos;
     private Player[] players = new Player[3];
     private BlockingQueue<TableOperate> operateQueue = new LinkedBlockingQueue<TableOperate>();
-    private LinkedList<PlayedCards> playedCards = new LinkedList<PlayedCards>();
+    private LinkedList<HistoryCards> historyCards = new LinkedList<HistoryCards>();
     private ScheduledFuture<?> playFuture;
     private byte orderNo;
     private TableState tableState;
@@ -41,7 +41,7 @@ public class Table {
         orderNo = 1;
         currentPos = 0;
         operateQueue.clear();
-        playedCards.clear();
+        historyCards.clear();
         cancelPlayFuture();
         for (int i = 0; i < players.length; i++) {
             players[i] = null;
@@ -100,11 +100,11 @@ public class Table {
         //2.通知所有玩家,不出
         //3.操作位置切换为下一个
         cancelPlayFuture();
-        notifyAllPlayer(new PlayedCards(player.getPlayerId(), null));
+        notifyAllPlayer(new HistoryCards(player.getPlayerId(), null));
 
         currentPos = getNextPos(currentPos);
         orderNo++;
-        players[currentPos].turnToPlay(this, orderNo,playedCards.getLast());//通知下个玩家出牌
+        players[currentPos].turnToPlay(this, orderNo, historyCards.getLast());//通知下个玩家出牌
         //设置超时处理器
         playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
         return true;
@@ -138,8 +138,8 @@ public class Table {
             //2.从手牌中移除此牌
             player.removeCards(playCards.getCards());
             //3.设置上次出牌玩家为当前用户
-            PlayedCards history = new PlayedCards(player.getPlayerId(), playCards.getCards());
-            playedCards.addLast(history);
+            HistoryCards history = new HistoryCards(player.getPlayerId(), playCards.getCards());
+            historyCards.addLast(history);
             //4.通知所有玩家出牌信息
             notifyAllPlayer(history);
             //5.检查该玩家的牌是否出完,出完则gameover
@@ -152,7 +152,7 @@ public class Table {
             //6.操作位置切换为下一个
             currentPos = getNextPos(currentPos);
             orderNo++;
-            players[currentPos].turnToPlay(this, orderNo,playedCards.getLast());//通知下个玩家出牌
+            players[currentPos].turnToPlay(this, orderNo, historyCards.getLast());//通知下个玩家出牌
             //设置超时处理器
             playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
             return true;
@@ -168,14 +168,14 @@ public class Table {
         }
     }
 
-    private void notifyAllPlayer(PlayedCards history) {
+    private void notifyAllPlayer(HistoryCards history) {
         for (Player one : players) {
             one.notifyPlayedCards(history);
         }
     }
 
     private boolean isGreaterThanLast(byte[] cards) {
-        return CardUtils.isGreater(cards, playedCards.getLast().getCards());
+        return CardUtils.isGreater(cards, historyCards.getLast().getCards());
     }
 
     private void cancelPlayFuture() {
@@ -189,7 +189,7 @@ public class Table {
     }
 
     private boolean isMaster(Player player) {
-        return playedCards.isEmpty() || player.getPlayerId().equals(playedCards.getLast().getPlayerId());
+        return historyCards.isEmpty() || player.getPlayerId().equals(historyCards.getLast().getPlayerId());
     }
 
     public void addPlayer(Player player) {
@@ -221,7 +221,7 @@ public class Table {
                     //TODO 超时机制失败
                 }
             } else {
-                byte[] tmp = CardUtils.getCardsGreaterThan(playedCards.getLast().getCards(), player.getHandCards());
+                byte[] tmp = CardUtils.getCardsGreaterThan(historyCards.getLast().getCards(), player.getHandCards());
                 if (tmp != null && tmp.length > 0) {
                     if (!playCards(player, tmp, oldOrderNo)) {
                         //TODO 超时机制失败

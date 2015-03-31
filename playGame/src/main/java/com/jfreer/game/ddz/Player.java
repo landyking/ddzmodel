@@ -38,11 +38,11 @@ public class Player {
         }
     }
 
-    public void turnToPlay(Table table, byte oldOrderNo,PlayedCards lastHistory) {
+    public void turnToPlay(Table table, byte oldOrderNo,HistoryCards lastHistory) {
 
     }
 
-    public void notifyPlayedCards(PlayedCards history) {
+    public void notifyPlayedCards(HistoryCards history) {
     }
 
     public Integer getPlayerId() {
