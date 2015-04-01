@@ -1,11 +1,11 @@
 package com.jfreer.game.ddz.player;
 
 import com.jfreer.game.ddz.CardUtils;
-import com.jfreer.game.ddz.DDZThreadPoolExecutor;
 import com.jfreer.game.ddz.HistoryCards;
 import com.jfreer.game.ddz.Player;
 import com.jfreer.game.ddz.core.Table;
 import com.jfreer.game.ddz.core.TableManager;
+import com.jfreer.game.ddz.thread.DDZExecutor;
 
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +38,7 @@ public class RobotPlayer extends Player {
          */
         int delay = random.nextInt(10) + 5;
 
-        DDZThreadPoolExecutor.INSTANCE.schedule(new Runnable() {
+        DDZExecutor.shortWorker().schedule(new Runnable() {
             @Override
             public void run() {
                 /**

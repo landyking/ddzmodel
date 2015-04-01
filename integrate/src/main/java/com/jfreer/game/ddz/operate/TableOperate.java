@@ -33,4 +33,6 @@ public class TableOperate extends IOperate {
     public void setPlayer(Player player) {
         this.player = player;
     }
+
+
 }

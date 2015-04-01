@@ -7,6 +7,7 @@ import com.jfreer.game.ddz.exception.PlayerNotOnTheTableException;
 import com.jfreer.game.ddz.exception.TableAlreadyFullException;
 import com.jfreer.game.ddz.operate.*;
 import com.jfreer.game.ddz.player.RobotPlayer;
+import com.jfreer.game.ddz.thread.DDZExecutor;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -66,7 +67,7 @@ public class Table {
 
         player.afterJoinTable(this);
         if (!isFull()) {
-            playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new Runnable() {
+            playFuture = DDZExecutor.shortWorker().schedule(new Runnable() {
                 @Override
                 public void run() {
                     RobotPlayer robot = new RobotPlayer(Ids.playerIdGen.getAndIncrement(), tableManager);
@@ -121,7 +122,7 @@ public class Table {
     public void restartGame() {
         stopTableFuture();
 
-        tableFuture = DDZThreadPoolExecutor.INSTANCE.submit(new Runnable() {
+        tableFuture = DDZExecutor.longWorker().submit(new Runnable() {
             @Override
             public void run() {
                 boolean isException = false;
@@ -195,7 +196,7 @@ public class Table {
 
     private boolean doCallDealer() throws InterruptedException {
         players[currentPos].notifyCallDealer(this, orderNo);
-        playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoCallDealer(players[currentPos], false, orderNo), 30, TimeUnit.SECONDS);
+        playFuture = DDZExecutor.shortWorker().schedule(new AutoCallDealer(players[currentPos], false, orderNo), 30, TimeUnit.SECONDS);
         while (true) {
             IOperate operate = operateQueue.take();
             if (operate instanceof CallDealer) {
@@ -258,7 +259,7 @@ public class Table {
                             operateQueue.add(e);
                         } else {
                             players[currentPos].notifyCallDealer(this, orderNo);
-                            playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoCallDealer(players[currentPos], false, orderNo), 30, TimeUnit.SECONDS);
+                            playFuture = DDZExecutor.shortWorker().schedule(new AutoCallDealer(players[currentPos], false, orderNo), 30, TimeUnit.SECONDS);
                         }
                     }
                 }
@@ -332,7 +333,7 @@ public class Table {
         Log.info("牌局开始,地主" + players[currentPos] + "先出");
         players[currentPos].turnToPlay(this, orderNo, null);//通知下个玩家出牌
         //设置超时处理器
-        playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
+        playFuture = DDZExecutor.shortWorker().schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
 
         while (tableState != Consts.TableState.GameOver) {
             IOperate operate = operateQueue.take();
@@ -409,7 +410,7 @@ public class Table {
             orderNo++;
             players[currentPos].turnToPlay(this, orderNo, historyCards.getLast());//通知下个玩家出牌
             //设置超时处理器
-            playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
+            playFuture = DDZExecutor.shortWorker().schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
             return true;
         } else {
             operate.fail("没有上家牌大!");
@@ -448,7 +449,7 @@ public class Table {
         orderNo++;
         players[currentPos].turnToPlay(this, orderNo, historyCards.getLast());//通知下个玩家出牌
         //设置超时处理器
-        playFuture = DDZThreadPoolExecutor.INSTANCE.schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
+        playFuture = DDZExecutor.shortWorker().schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
         return true;
     }
 

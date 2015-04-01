@@ -1,4 +1,4 @@
-package com.jfreer.game.ddz;
+package com.jfreer.game.ddz.thread;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -9,10 +9,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  * Date: 15/3/8
  * Time: 下午3:29
  */
-public class DDZThreadPoolExecutor extends ScheduledThreadPoolExecutor {
-    public static final DDZThreadPoolExecutor INSTANCE = new DDZThreadPoolExecutor(100);
+ class DDZThreadPoolExecutor extends ScheduledThreadPoolExecutor {
 
-    private DDZThreadPoolExecutor(int corePoolSize) {
+    DDZThreadPoolExecutor(int corePoolSize) {
         super(corePoolSize);
     }
 

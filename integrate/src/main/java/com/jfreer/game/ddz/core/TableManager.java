@@ -1,6 +1,5 @@
 package com.jfreer.game.ddz.core;
 
-import com.jfreer.game.ddz.DDZThreadPoolExecutor;
 import com.jfreer.game.ddz.Ids;
 import com.jfreer.game.ddz.Log;
 import com.jfreer.game.ddz.Player;
@@ -9,6 +8,7 @@ import com.jfreer.game.ddz.operate.JoinTable;
 import com.jfreer.game.ddz.operate.LeftTable;
 import com.jfreer.game.ddz.operate.RaiseHands;
 import com.jfreer.game.ddz.operate.TableOperate;
+import com.jfreer.game.ddz.thread.DDZExecutor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +24,7 @@ public class TableManager {
     private Map<Integer, Table> allTables = new HashMap<Integer, Table>();
 
     public TableManager() {
-        DDZThreadPoolExecutor.INSTANCE.execute(new Runnable() {
+        DDZExecutor.longWorker().execute(new Runnable() {
             @Override
             public void run() {
                 Thread.currentThread().setName("table-manager");
