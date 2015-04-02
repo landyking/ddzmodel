@@ -12,12 +12,12 @@ public class Log {
         logger.warn(s);
     }
 
-    public static void info(String s) {
-        logger.info(s);
+    public static void info(int tid,String s) {
+        logger.info("[table:"+tid+"#"+s);
     }
 
-    public static void info(String s, Object... args) {
-        logger.info(String.format(s, args));
+    public static void info(int tid,String s, Object... args) {
+        logger.info("[table:"+tid+"#"+String.format(s, args));
     }
     public static void debug(String s) {
         logger.debug(s);

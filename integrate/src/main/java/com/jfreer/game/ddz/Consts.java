@@ -7,6 +7,6 @@ package com.jfreer.game.ddz;
  */
 public class Consts {
     public enum TableState {
-        Init, PublishCard, CallDealer,RaiseDealer, Playing, GameOver
+        Init, PublishCard, CallDealer,RaiseDealer,PublishBelowCard, Playing, GameOver
     }
 }

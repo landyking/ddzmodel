@@ -9,7 +9,5 @@ import com.jfreer.game.ddz.Log;
  * Time: 下午2:53
  */
 public class IOperate {
-    public void fail(String string) {
-        Log.info(string);
-    }
+
 }

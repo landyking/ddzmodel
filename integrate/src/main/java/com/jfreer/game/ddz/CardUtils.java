@@ -11,6 +11,7 @@ import java.util.*;
  */
 public class CardUtils {
 
+//    public static final int TOTAL_CARD_COUNT = 54;
     public static final int TOTAL_CARD_COUNT = 24;
     public static final int BELOW_CARD_COUNT = 3;
     public static final int PER_CARD_COUNT = (TOTAL_CARD_COUNT - BELOW_CARD_COUNT) / 3;

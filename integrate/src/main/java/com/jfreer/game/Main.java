@@ -3,7 +3,10 @@ package com.jfreer.game;
 import com.jfreer.game.ddz.Ids;
 import com.jfreer.game.ddz.Player;
 import com.jfreer.game.ddz.core.TableManager;
+import com.jfreer.game.ddz.core.share.TableManagerForShareQueueTable;
+import com.jfreer.game.ddz.core.single.TableManagerForSingleQueueTable;
 import com.jfreer.game.ddz.player.TestPlayer;
+import com.jfreer.game.ddz.thread.ProcessManager;
 
 import java.util.Random;
 
@@ -12,8 +15,10 @@ public class Main {
     public static Random rd = new Random();
 
     public static void main(String[] args) throws InterruptedException {
-        final TableManager manager = new TableManager();
-        for (int i = 0; i < 100; i++) {
+        ProcessManager processManager = new ProcessManager(1000);
+        final TableManager manager = new TableManagerForShareQueueTable(processManager);
+//        final TableManager manager = new TableManagerForSingleQueueTable();
+        for (int i = 0; i < 10000; i++) {
             Player player = new TestPlayer(Ids.playerIdGen.getAndIncrement(), manager);
             manager.joinTable(player, null);
         }

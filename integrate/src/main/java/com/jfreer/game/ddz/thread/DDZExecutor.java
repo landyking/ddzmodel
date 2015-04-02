@@ -8,7 +8,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  * Time: 下午1:21
  */
 public class DDZExecutor {
-    public static final int TABLE_PROCESS_COUNT = 100;
+    public static final int TABLE_PROCESS_COUNT = 1000;
     private static DDZThreadPoolExecutor LONG_WORD_POOL = new DDZThreadPoolExecutor(TABLE_PROCESS_COUNT + 1);
     private static DDZThreadPoolExecutor SHORT_WORD_POOL = new DDZThreadPoolExecutor(10);
 

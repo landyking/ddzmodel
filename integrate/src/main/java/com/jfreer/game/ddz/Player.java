@@ -89,7 +89,7 @@ public abstract class Player {
 
 
     public void afterJoinTable(Table table) {
-        Log.info(String.format("%s join table %s !", this.toString(), table.getTableId()));
+        Log.info(table.getTableId(),String.format("%s join table %s !", this.toString(), table.getTableId()));
     }
 
     public abstract void afterTableFull(Table table);

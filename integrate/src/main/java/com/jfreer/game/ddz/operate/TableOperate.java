@@ -1,12 +1,12 @@
 package com.jfreer.game.ddz.operate;
 
+import com.jfreer.game.ddz.Log;
 import com.jfreer.game.ddz.Player;
 
 /**
  * Created by landy on 2015/3/8.
  */
 public class TableOperate extends IOperate {
-    protected Player player;
     private Integer destTableId;
     private byte orderNo;
 
@@ -26,13 +26,7 @@ public class TableOperate extends IOperate {
         this.destTableId = destTableId;
     }
 
-    public Player getPlayer() {
-        return player;
+    public void fail(String string) {
+        Log.info(getDestTableId(), string);
     }
-
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
-
-
 }
