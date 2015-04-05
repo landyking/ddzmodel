@@ -1,5 +1,6 @@
 package com.jfreer.game.ddz.player;
 
+import com.jfreer.game.Main;
 import com.jfreer.game.ddz.CardUtils;
 import com.jfreer.game.ddz.HistoryCards;
 import com.jfreer.game.ddz.Player;
@@ -23,6 +24,7 @@ public class TestPlayer extends Player {
     }
 
     public void notifyCallDealer(final Table table, final byte orderNo) {
+//        table.callDealer(TestPlayer.this, Main.TestData.poll(), orderNo);
         DDZExecutor.shortWorker().schedule(new Runnable() {
             @Override
             public void run() {

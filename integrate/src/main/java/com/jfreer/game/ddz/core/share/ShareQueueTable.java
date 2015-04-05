@@ -226,15 +226,11 @@ public class ShareQueueTable extends Table implements TableOperateListener {
         currentPos = getNextPos(currentPos);
 
         if (callDealerFlag[currentPos] == 0) {
-            CallDealer e = new CallDealer();
-            e.setOrderNo(this.orderNo);
-            e.setCall(false);
-            e.setPlayer(players[currentPos]);
-            operateProcess.addOperate(e);
-        } else {
-            players[currentPos].notifyCallDealer(this, orderNo);
-            playFuture = DDZExecutor.shortWorker().schedule(new AutoCallDealer(players[currentPos], false, orderNo), 30, TimeUnit.SECONDS);
+            //针对前一次没有叫地主的玩家，直接跳过，默认为不抢
+            currentPos = getNextPos(currentPos);
         }
+        players[currentPos].notifyCallDealer(this, orderNo);
+        playFuture = DDZExecutor.shortWorker().schedule(new AutoCallDealer(players[currentPos], false, orderNo), 30, TimeUnit.SECONDS);
     }
 
     private int getNextPos(int nextPos) {
@@ -544,9 +540,8 @@ public class ShareQueueTable extends Table implements TableOperateListener {
                         initTableAndPlayer();
                         //发牌
                         publishCards();
-                        //重置叫牌标识
+                        //重置叫牌标识 //通知第一个人叫牌
                         initCallDealer();
-                        //通知第一个人叫牌
                     }
                     break;
                 case CallDealer:
