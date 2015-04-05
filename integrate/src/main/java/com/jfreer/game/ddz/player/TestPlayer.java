@@ -22,14 +22,13 @@ public class TestPlayer extends Player {
         this.tableManager = tableManager;
     }
 
-    public void notifyCallDealer(Table table, byte orderNo) {
-        try {
-//            TimeUnit.SECONDS.sleep(30);
-            TimeUnit.SECONDS.sleep(5);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        table.callDealer(this, random.nextBoolean(), orderNo);
+    public void notifyCallDealer(final Table table, final byte orderNo) {
+        DDZExecutor.shortWorker().schedule(new Runnable() {
+            @Override
+            public void run() {
+                table.callDealer(TestPlayer.this, random.nextBoolean(), orderNo);
+            }
+        },5,TimeUnit.SECONDS);
     }
 
 
