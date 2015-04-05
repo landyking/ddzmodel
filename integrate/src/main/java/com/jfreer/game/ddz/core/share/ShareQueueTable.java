@@ -336,7 +336,7 @@ public class ShareQueueTable extends Table implements TableOperateListener {
             stopPlayFuture();
             //2.从手牌中移除此牌
             player.removeCards(operate.getCards());
-            Log.info(getTableId(),player + ":" + player.getHandCards());
+            //Log.info(getTableId(),player + ":" + player.getHandCards());
             //3.设置上次出牌玩家为当前用户
             HistoryCards history = new HistoryCards(player.getPlayerId(), operate.getCards());
             historyCards.addLast(history);

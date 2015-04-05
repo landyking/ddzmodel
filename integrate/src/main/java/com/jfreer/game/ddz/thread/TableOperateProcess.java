@@ -13,8 +13,13 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Time: 下午1:51
  */
 public class TableOperateProcess implements Runnable {
+    private final int id;
     private BlockingQueue<TableOperate> operateBlockingQueue = new LinkedBlockingQueue<TableOperate>();
     private ConcurrentMap<Integer, TableOperateListener> listenerMap = new ConcurrentHashMap<Integer, TableOperateListener>();
+
+    public TableOperateProcess(int i) {
+        this.id=i;
+    }
 
     boolean addListener(int tableId, TableOperateListener listener) {
         TableOperateListener rst = listenerMap.putIfAbsent(tableId, listener);
@@ -32,11 +37,16 @@ public class TableOperateProcess implements Runnable {
     @Override
     public void run() {
         try {
+            Thread.currentThread().setName("table-process-"+id);
             while (true) {
                 TableOperate take = operateBlockingQueue.take();
+                long tmp=System.currentTimeMillis();
                 if (take.getDestTableId() != null && listenerMap.containsKey(take.getDestTableId())) {
-                    listenerMap.get(take.getDestTableId()).process(take);
+                    TableOperateListener listener = listenerMap.get(take.getDestTableId());
+                    listener.process(take);
                 }
+                long offset=System.currentTimeMillis()-tmp;
+                //System.out.println(offset);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();

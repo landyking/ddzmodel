@@ -2,6 +2,7 @@ package com.jfreer.game.ddz.thread;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * User: landy
@@ -10,31 +11,25 @@ import java.util.PriorityQueue;
  */
 public class ProcessManager {
 
-    private static final Comparator<TableOperateProcess> TABLE_OPERATE_PROCESS_COMPARATOR = new Comparator<TableOperateProcess>() {
-        @Override
-        public int compare(TableOperateProcess o1, TableOperateProcess o2) {
-            return o1.listenerCount() - o2.listenerCount();
-        }
-    };
-    private PriorityQueue<TableOperateProcess> processQueue = new PriorityQueue<TableOperateProcess>(20, TABLE_OPERATE_PROCESS_COMPARATOR);
+    private TableOperateProcess[] processQueue;
+    private AtomicInteger childIndex = new AtomicInteger();
 
     public ProcessManager(int size) {
+        processQueue=new TableOperateProcess[size];
         for (int i = 0; i < size; i++) {
-            TableOperateProcess process = new TableOperateProcess();
+            TableOperateProcess process = new TableOperateProcess(i);
             DDZExecutor.longWorker().execute(process);
-            processQueue.add(process);
+            processQueue[i]=process;
         }
     }
 
-    public synchronized TableOperateProcess registerProcessListener(int tableId, TableOperateListener listener) {
-        TableOperateProcess poll = processQueue.poll();
+    public TableOperateProcess registerProcessListener(int tableId, TableOperateListener listener) {
+        TableOperateProcess poll = processQueue[Math.abs(childIndex.getAndIncrement()%processQueue.length)];
         poll.addListener(tableId, listener);
-        processQueue.add(poll);
         return poll;
     }
 
-    public synchronized void unregisterProcessListener(int tableId, TableOperateProcess process) {
+    public void unregisterProcessListener(int tableId, TableOperateProcess process) {
         process.removeListener(tableId);
-        processQueue.remove(process);
     }
 }

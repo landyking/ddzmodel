@@ -15,10 +15,10 @@ public class Main {
     public static Random rd = new Random();
 
     public static void main(String[] args) throws InterruptedException {
-        ProcessManager processManager = new ProcessManager(1000);
+        ProcessManager processManager = new ProcessManager(3);
         final TableManager manager = new TableManagerForShareQueueTable(processManager);
 //        final TableManager manager = new TableManagerForSingleQueueTable();
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 20000; i++) {
             Player player = new TestPlayer(Ids.playerIdGen.getAndIncrement(), manager);
             manager.joinTable(player, null);
         }
