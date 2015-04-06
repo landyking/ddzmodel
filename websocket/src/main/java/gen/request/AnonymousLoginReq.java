@@ -1,25 +1,25 @@
 package gen.request;
 
-import com.jfreer.game.websocket.IReq;
+import com.jfreer.game.websocket.protocol.IReq;
 
 /**
 * 匿名登陆
 */
 public class AnonymousLoginReq extends IReq {
 
-    /** 旧的uid,没有则为-1 */
-    private long uid;
+    /** 旧的pid,没有则为-1 */
+    private int pid;
 
     public AnonymousLoginReq() {
         super(0);
     }
 
-    public void setUid(long uid){
-        this.uid=uid;
+    public void setPid(int pid){
+        this.pid=pid;
     }
 
-    public long getUid(){
-        return this.uid;
+    public int getPid(){
+        return this.pid;
     }
 
 }

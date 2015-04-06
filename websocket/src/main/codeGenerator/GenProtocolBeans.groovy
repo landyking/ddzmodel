@@ -128,6 +128,7 @@ class GenProtocolBeans {
         new File(destDirPath + "/response").mkdirs()
 
         protocols.each { one ->
+            if(one.req.isEmpty())return;
             def handlerJavaFile = new File(destDirPath + "/handler/" + one.protocolName + "Handler.java");
             if (!handlerJavaFile.exists()) {
                 println "gen handler file:" + handlerJavaFile.getAbsolutePath()
@@ -139,6 +140,7 @@ class GenProtocolBeans {
         println "generator handler file over......"
 
         protocols.each { one ->
+            if(one.req.isEmpty())return;
             def reqJavaFile = new File(destDirPath + "/request/" + one.protocolName + "Req.java");
             println "gen request file:" + reqJavaFile.getAbsolutePath()
             def reqContent = reqTpl.make(one).toString()
@@ -148,6 +150,7 @@ class GenProtocolBeans {
         println "generator request file over......"
 
         protocols.each { one ->
+            if(one.resp.isEmpty())return;
             def respJavaFile = new File(destDirPath + "/response/" + one.protocolName + "Resp.java");
             println "gen response file:" + respJavaFile.getAbsolutePath()
             def respContent = respTpl.make(one).toString()

@@ -5,6 +5,7 @@ ServerRequest._send = function (no, obj) {
 };
 <%
     protocols.each{
+    if(it.req.isEmpty()){return;};
     String params="",obj="";
     it.req.each{
         params+=","+it.name

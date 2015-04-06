@@ -1,6 +1,6 @@
 package gen.response;
 
-import com.jfreer.game.websocket.IResp;
+import com.jfreer.game.websocket.protocol.IResp;
 
 /**
 * 匿名登陆
@@ -8,18 +8,18 @@ import com.jfreer.game.websocket.IResp;
 public class AnonymousLoginResp extends IResp {
 
     /** 服务器分配的匿名id */
-    private long uid;
+    private int pid;
 
     public AnonymousLoginResp() {
         super(0);
     }
 
-    public void setUid(long uid){
-        this.uid=uid;
+    public void setPid(int pid){
+        this.pid=pid;
     }
 
-    public long getUid(){
-        return this.uid;
+    public int getPid(){
+        return this.pid;
     }
 
 }

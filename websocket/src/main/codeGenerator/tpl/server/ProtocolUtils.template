@@ -1,6 +1,8 @@
 package gen;
 
-<%protocols.each{%>
+<%protocols.each{
+if(it.req.isEmpty())return;
+%>
 import gen.handler.${it.protocolName}Handler;
 import gen.request.${it.protocolName}Req;<%}%>
 
@@ -29,7 +31,9 @@ public class ProtocolUtils {
 
     public static final Map<Integer, Tuple> REQ_MAPPINGS = new HashMap<Integer, Tuple>();
 
-    static {<%protocols.each{%>
+    static {<%protocols.each{
+        if(it.req.isEmpty())return;
+    %>
         REQ_MAPPINGS.put(${it.id}, new Tuple(${it.protocolName}Req.class,${it.protocolName}Handler.class));<%}%>
     }
 }

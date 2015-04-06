@@ -1,6 +1,6 @@
 package gen.request;
 
-import com.jfreer.game.websocket.IReq;
+import com.jfreer.game.websocket.protocol.IReq;
 
 /**
 * ${desc}

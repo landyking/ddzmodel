@@ -11,6 +11,21 @@
 <head>
     <title></title>
     <meta charset="utf-8">
+    <link rel="icon" type="image/GIF" href="js/poker/res/favicon.ico"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="full-screen" content="yes"/>
+    <meta name="screen-orientation" content="portrait"/>
+    <meta name="x5-fullscreen" content="true"/>
+    <meta name="360-fullscreen" content="true"/>
+    <style>
+        body, canvas, div {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -khtml-user-select: none;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        }
+    </style>
     <script src="js/jquery-2.1.3.min.js"></script>
     <script src="js/sockjs.min.js"></script>
     <script src="js/ws.js"></script>
@@ -26,7 +41,9 @@
         }
     %>
 </head>
-<body>
-hello china!
+<body style="padding:0; margin: 0; background: #000;">
+<canvas id="gameCanvas" width="480" height="320"></canvas>
+<script src="js/frameworks/cocos2d-html5/CCBoot.js"></script>
+<script src="js/poker/main.js"></script>
 </body>
 </html>

@@ -18,6 +18,6 @@ def genPath = rootPath + "/src/main/codeGenerator"
 
 GenProtocolBeans.generator(genPath,
         new File(rootPath + "/src/main/docs/protocols.xml"),
-        rootPath + "/src/main/java"
+        rootPath + "/src/main"
 )
 println "generator Protocol over....."

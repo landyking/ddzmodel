@@ -5,7 +5,7 @@ ServerResponse.processResponse = function (ctx,e) {
     switch (parse.no) {
         <%protocols.each{%>
         case ${it.id}: //${it.desc}
-            ServerResponse.${it.protocolName}(ctx,parse.data);
+            ServerResponse.${it.protocolName}(ctx,JSON.parse(parse.data));
             break;
         <%}%>
     }

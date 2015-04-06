@@ -1,0 +1,21 @@
+{
+  "project_type": "javascript",
+  "debugMode": 1,
+  "showFPS": true,
+  "frameRate": 60,
+  "id": "gameCanvas",
+  "renderMode": 0,
+  "engineDir": "js/frameworks/cocos2d-html5",
+  "modules": ["cocos2d"],
+  "jsList": [
+    "js/poker/src/resource.js",
+    "js/poker/src/TableScene.js",
+    "js/poker/src/Card.js",
+    "js/poker/src/HandCards.js",
+    "js/poker/src/Global.js",
+    "js/poker/src/BelowCards.js",
+    "js/poker/src/TimerLayer.js",
+    "js/poker/src/StartMenuScene.js",
+    "js/poker/src/Player.js"
+  ]
+}

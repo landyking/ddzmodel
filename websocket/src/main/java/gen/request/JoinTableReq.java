@@ -1,25 +1,36 @@
 package gen.request;
 
-import com.jfreer.game.websocket.IReq;
+import com.jfreer.game.websocket.protocol.IReq;
 
 /**
 * 加入桌子
 */
 public class JoinTableReq extends IReq {
 
-    /** 用户id */
-    private long uid;
+    /** 桌号，默认-1 */
+    private int tableId;
+
+    /** 玩家id */
+    private int pid;
 
     public JoinTableReq() {
         super(1);
     }
 
-    public void setUid(long uid){
-        this.uid=uid;
+    public void setTableId(int tableId){
+        this.tableId=tableId;
     }
 
-    public long getUid(){
-        return this.uid;
+    public int getTableId(){
+        return this.tableId;
+    }
+
+    public void setPid(int pid){
+        this.pid=pid;
+    }
+
+    public int getPid(){
+        return this.pid;
     }
 
 }

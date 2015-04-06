@@ -1,12 +1,16 @@
 package gen.handler;
 
-import com.jfreer.game.websocket.IProtocol;
+import com.jfreer.game.websocket.protocol.IProtocol;
 import gen.request.${protocolName}Req;
-import gen.response.${protocolName}Resp;
+//import gen.response.${protocolName}Resp;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 /**
 * ${desc}
 */
+@Component
+@Scope("prototype")
 public class ${protocolName}Handler extends IProtocol<${protocolName}Req> {
 
     @Override

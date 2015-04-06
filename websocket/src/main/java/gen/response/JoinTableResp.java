@@ -1,6 +1,6 @@
 package gen.response;
 
-import com.jfreer.game.websocket.IResp;
+import com.jfreer.game.websocket.protocol.IResp;
 
 /**
 * 加入桌子
@@ -13,14 +13,8 @@ public class JoinTableResp extends IResp {
     /** 位置 */
     private int tablePos;
 
-    /** 其他玩家id */
-    private int[] otherUid;
-
-    /** 其他玩家名字 */
-    private String[] otherName;
-
-    /** 其他玩家位置 */
-    private int[] otherPos;
+    /** 玩家id */
+    private int pid;
 
     public JoinTableResp() {
         super(1);
@@ -42,28 +36,12 @@ public class JoinTableResp extends IResp {
         return this.tablePos;
     }
 
-    public void setOtherUid(int[] otherUid){
-        this.otherUid=otherUid;
+    public void setPid(int pid){
+        this.pid=pid;
     }
 
-    public int[] getOtherUid(){
-        return this.otherUid;
-    }
-
-    public void setOtherName(String[] otherName){
-        this.otherName=otherName;
-    }
-
-    public String[] getOtherName(){
-        return this.otherName;
-    }
-
-    public void setOtherPos(int[] otherPos){
-        this.otherPos=otherPos;
-    }
-
-    public int[] getOtherPos(){
-        return this.otherPos;
+    public int getPid(){
+        return this.pid;
     }
 
 }

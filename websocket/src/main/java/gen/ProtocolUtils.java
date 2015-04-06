@@ -5,6 +5,10 @@ import gen.handler.AnonymousLoginHandler;
 import gen.request.AnonymousLoginReq;
 import gen.handler.JoinTableHandler;
 import gen.request.JoinTableReq;
+import gen.handler.RaiseHandHandler;
+import gen.request.RaiseHandReq;
+import gen.handler.CallDealerHandler;
+import gen.request.CallDealerReq;
 
 
 import java.util.HashMap;
@@ -34,5 +38,7 @@ public class ProtocolUtils {
     static {
         REQ_MAPPINGS.put(0, new Tuple(AnonymousLoginReq.class,AnonymousLoginHandler.class));
         REQ_MAPPINGS.put(1, new Tuple(JoinTableReq.class,JoinTableHandler.class));
+        REQ_MAPPINGS.put(2, new Tuple(RaiseHandReq.class,RaiseHandHandler.class));
+        REQ_MAPPINGS.put(5, new Tuple(CallDealerReq.class,CallDealerHandler.class));
     }
 }

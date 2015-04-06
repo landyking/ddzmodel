@@ -1,6 +1,6 @@
 package gen.response;
 
-import com.jfreer.game.websocket.IResp;
+import com.jfreer.game.websocket.protocol.IResp;
 
 /**
 * ${desc}

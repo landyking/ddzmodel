@@ -1,25 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE protocols [
+    <!ELEMENT protocols (protocol*)>
+    <!ELEMENT protocol      (req?,resp?)>
+    <!ELEMENT req    (field+)>
+    <!ELEMENT resp (field+,array?)>
+    <!ELEMENT array    (field+)>
+    <!ELEMENT field    EMPTY>
+    <!ATTLIST protocol id CDATA #REQUIRED>
+    <!ATTLIST protocol name ID #REQUIRED>
+    <!ATTLIST protocol desc CDATA #REQUIRED>
+    <!ATTLIST field type (i|l|s|S|b) #REQUIRED>
+    <!ATTLIST field name CDATA #REQUIRED>
+    <!ATTLIST field desc CDATA #REQUIRED>
+]>
 <protocols>
     <protocol id="0" name="AnonymousLogin" desc="匿名登陆">
         <req>
-            <field type="l" name="uid" desc="旧的uid,没有则为-1"/>
+            <field type="i" name="pid" desc="旧的pid,没有则为-1"/>
         </req>
         <resp>
-            <field type="l" name="uid" desc="服务器分配的匿名id"/>
+            <field type="i" name="pid" desc="服务器分配的匿名id"/>
         </resp>
     </protocol>
     <protocol id="1" name="JoinTable" desc="加入桌子">
         <req>
-            <field type="l" name="uid" desc="用户id"/>
+            <field type="i" name="tableId" desc="桌号，默认-1"/>
+            <field type="i" name="pid" desc="玩家id"/>
         </req>
         <resp>
             <field type="i" name="tableId" desc="桌号"/>
             <field type="i" name="tablePos" desc="位置"/>
+            <field type="i" name="pid" desc="玩家id"/>
+        </resp>
+    </protocol>
+    <protocol id="2" name="RaiseHand" desc="举手">
+        <req>
+            <field type="i" name="pid" desc="用户id"/>
+        </req>
+        <resp>
+            <field type="i" name="pid" desc="用户id"/>
+        </resp>
+    </protocol>
+    <protocol id="3" name="PublishCards" desc="发牌">
+        <resp>
+            <field type="i" name="pid" desc="用户id"/>
             <array>
-                <field name="otherUid" type="i" desc="其他玩家id"/>
-                <field name="otherName" type="s" desc="其他玩家名字"/>
-                <field name="otherPos" type="i" desc="其他玩家位置"/>
+                <field type="b" name="cards" desc="手牌" />
             </array>
+        </resp>
+    </protocol>
+    <protocol id="4" name="NotifyCallDealer" desc="通知叫地主">
+        <resp>
+            <field type="i" name="pid" desc="用户id"/>
+            <field type="i" name="tablePos" desc="桌子位置"/>
+        </resp>
+    </protocol>
+    <protocol id="5" name="CallDealer" desc="叫地主">
+        <req>
+            <field type="i" name="pid" desc="player id"/>
+            <field type="b" name="isCall" desc="1:call,0:give up"/>
+        </req>
+        <resp>
+            <field type="i" name="pid" desc="用户id"/>
+            <field type="b" name="isCall" desc="1:call,0:give up"/>
         </resp>
     </protocol>
 </protocols>
