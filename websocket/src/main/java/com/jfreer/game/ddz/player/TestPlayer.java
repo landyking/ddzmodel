@@ -6,6 +6,7 @@ import com.jfreer.game.ddz.Player;
 import com.jfreer.game.ddz.core.Table;
 import com.jfreer.game.ddz.core.TableManager;
 import com.jfreer.game.ddz.thread.DDZExecutor;
+import com.jfreer.game.websocket.protocol.IResp;
 
 import java.util.concurrent.TimeUnit;
 
@@ -78,5 +79,15 @@ public class TestPlayer extends Player {
     public void afterGameOver(Table table) {
         super.afterGameOver(table);
         tableManager.raiseHands(this, table.getTableId());
+    }
+
+    @Override
+    public void pushToClient(IResp resp) {
+
+    }
+
+    @Override
+    public void afterCallDealer(boolean call) {
+
     }
 }

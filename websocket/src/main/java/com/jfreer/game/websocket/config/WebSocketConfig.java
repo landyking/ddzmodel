@@ -1,7 +1,6 @@
 package com.jfreer.game.websocket.config;
 
 import com.jfreer.game.ddz.core.TableManager;
-import com.jfreer.game.ddz.core.share.TableManagerForShareQueueTable;
 import com.jfreer.game.ddz.thread.ProcessManager;
 import com.jfreer.game.websocket.handler.WebSocketHandler;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +31,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Lazy
     public TableManager tableManager(){
         ProcessManager processManager = new ProcessManager(3);
-        TableManager manager = new TableManagerForShareQueueTable(processManager);
+        TableManager manager = new TableManager(processManager);
         return manager;
     }
 }

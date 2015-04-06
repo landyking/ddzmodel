@@ -1,7 +1,7 @@
 package com.jfreer.game.websocket.game;
 
 import com.google.common.collect.Maps;
-import com.jfreer.game.websocket.util.Ids;
+import com.jfreer.game.ddz.Ids;
 import com.jfreer.game.websocket.handler.DDZSession;
 
 import java.util.concurrent.ConcurrentMap;

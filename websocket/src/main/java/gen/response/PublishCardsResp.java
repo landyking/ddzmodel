@@ -11,7 +11,7 @@ public class PublishCardsResp extends IResp {
     private int pid;
 
     /** 手牌 */
-    private byte[] cards;
+    private int[] cards;
 
     public PublishCardsResp() {
         super(3);
@@ -25,11 +25,11 @@ public class PublishCardsResp extends IResp {
         return this.pid;
     }
 
-    public void setCards(byte[] cards){
+    public void setCards(int[] cards){
         this.cards=cards;
     }
 
-    public byte[] getCards(){
+    public int[] getCards(){
         return this.cards;
     }
 

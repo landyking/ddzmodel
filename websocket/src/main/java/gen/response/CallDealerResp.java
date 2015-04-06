@@ -10,8 +10,11 @@ public class CallDealerResp extends IResp {
     /** 用户id */
     private int pid;
 
+    /** 桌子位置 */
+    private int tablePos;
+
     /** 1:call,0:give up */
-    private byte isCall;
+    private int isCall;
 
     public CallDealerResp() {
         super(5);
@@ -25,11 +28,19 @@ public class CallDealerResp extends IResp {
         return this.pid;
     }
 
-    public void setIsCall(byte isCall){
+    public void setTablePos(int tablePos){
+        this.tablePos=tablePos;
+    }
+
+    public int getTablePos(){
+        return this.tablePos;
+    }
+
+    public void setIsCall(int isCall){
         this.isCall=isCall;
     }
 
-    public byte getIsCall(){
+    public int getIsCall(){
         return this.isCall;
     }
 

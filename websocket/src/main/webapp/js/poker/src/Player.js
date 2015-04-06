@@ -13,7 +13,7 @@ var Player = cc.Class.extend({
         this.handCards=new HandCards(parent,location,cards);
         this.titleLabel=new cc.LabelTTF("无名","Arial",12);
         this.titleLabel.setFontFillColor(blackColor)
-        this.actionLabel = new cc.LabelTTF("抢地主","Arial",18);
+        this.actionLabel = new cc.LabelTTF("","Arial",18);
         this.actionLabel.setFontFillColor(blackColor);
         if("south"==location) {
             this.titleLabel.setAnchorPoint(0,0);

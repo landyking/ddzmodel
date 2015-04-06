@@ -1,4 +1,10 @@
 var TableLayer = cc.Layer.extend({
+    leftPlayer:null,
+    rightPlayer:null,
+    currentPlayer:null,
+    playedCards:null,
+    belowCards:null,
+
     ctor: function () {
         //////////////////////////////
         // 1. super init first
@@ -6,30 +12,33 @@ var TableLayer = cc.Layer.extend({
 
         return true;
     },
-    showPoker: function () {
+    showPoker: function (cards) {
         //var center=new HandCards("center",[0,3,8,9,13,21,22,40]);
         //this.addChild(center);
 
 
-        var newVar = [0, 3, 8, 9, 10, 12, 13, 18, 19, 21, 22, 32, 40];
+        var newVar = cards;
         //newVar.reverse();
         console.log(newVar);
-        var unknows = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
+        var unknows = [];
+        for(var i in cards) {
+            unknows.push(-1);
+        }
         var west = new Player(this, "west", unknows);
+        this.leftPlayer=west;
 
         var south = new Player(this, "south", newVar);
-        window.south=south;
+        this.currentPlayer=south;
 
         var east = new Player(this, "east", unknows);
-        window.east=east;
+        this.rightPlayer=east;
 
-        var center = new HandCards(this, "center", [3,5,7]);
-        window.center=center;
+        var center = new HandCards(this, "center", []);
+        this.playedCards=center;
 
         var belowCards = new BelowCards(this);
         belowCards.showUnknowStyle();
-
-        window.belowCards = belowCards;
+        this.belowCards=belowCards;
     }
 });
 

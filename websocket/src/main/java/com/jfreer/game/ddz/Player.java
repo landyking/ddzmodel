@@ -2,6 +2,7 @@ package com.jfreer.game.ddz;
 
 import com.jfreer.game.ddz.core.Table;
 import com.jfreer.game.ddz.exception.CardNotExistException;
+import com.jfreer.game.websocket.protocol.IResp;
 
 import java.util.*;
 
@@ -55,7 +56,7 @@ public abstract class Player {
 
     public abstract void notifyCallDealer(Table table, byte orderNo);
 
-    public void addHandCards(byte[] card) {
+    private void addHandCards(byte[] card) {
         for (byte one : card) {
             this.handCards.add(one);
         }
@@ -103,4 +104,14 @@ public abstract class Player {
         this.getHandCards().clear();
     }
 
+    public void publishHandCards(byte[] card){
+        this.addHandCards(card);
+    }
+
+    public void publishBelowCards(byte[] belowCards) {
+        this.addHandCards(belowCards);
+    }
+    public abstract void pushToClient(IResp resp) ;
+
+    public abstract void afterCallDealer(boolean call);
 }

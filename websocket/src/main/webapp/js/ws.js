@@ -8,7 +8,7 @@ ws.onmessage = function (e) {
     ws.workQueue.push(e);
 };
 ws.doWork=function(ctx){
-    while(ws.workQueue.length>0) {
+    if(ws.workQueue.length>0) {
         var e=ws.workQueue.pop();
         if (ServerResponse) {
             ServerResponse.processResponse(ctx,e);
