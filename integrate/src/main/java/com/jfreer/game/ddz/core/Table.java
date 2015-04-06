@@ -1,6 +1,7 @@
 package com.jfreer.game.ddz.core;
 
 import com.jfreer.game.ddz.Player;
+import com.jfreer.game.ddz.exception.PlayerNotOnTheTableException;
 import com.jfreer.game.ddz.player.RobotPlayer;
 
 /**
@@ -13,4 +14,5 @@ public abstract class Table {
     public abstract boolean callDealer(Player player, boolean b, byte orderNo);
     public abstract boolean playCards(Player player, byte[] cards, byte orderNo);
     public abstract boolean playNothing(Player player, byte orderNo);
+    public abstract int getPlayerPos(Player player) throws PlayerNotOnTheTableException;
 }

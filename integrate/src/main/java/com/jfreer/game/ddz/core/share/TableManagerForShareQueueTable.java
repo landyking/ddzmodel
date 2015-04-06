@@ -25,6 +25,17 @@ public class TableManagerForShareQueueTable extends TableManager {
 
     public TableManagerForShareQueueTable(ProcessManager processManager) {
         this.processManager=processManager;
+    }
+
+    public void joinTable(Player player, Integer destTableId) {
+        JoinTable e = new JoinTable();
+        e.setPlayer(player);
+        e.setDestTableId(destTableId);
+        tableOperateQueue.add(e);
+    }
+
+    @Override
+    public void start() {
         DDZExecutor.longWorker().execute(new Runnable() {
             @Override
             public void run() {
@@ -34,11 +45,9 @@ public class TableManagerForShareQueueTable extends TableManager {
         });
     }
 
-    public void joinTable(Player player, Integer destTableId) {
-        JoinTable e = new JoinTable();
-        e.setPlayer(player);
-        e.setDestTableId(destTableId);
-        tableOperateQueue.add(e);
+    @Override
+    public void stop() {
+        throw new UnsupportedOperationException();
     }
 
     public void leftTable(Player player, Integer destTableId) {
@@ -65,7 +74,7 @@ public class TableManagerForShareQueueTable extends TableManager {
                     Player player = join.getPlayer();
                     Integer destTableId = join.getDestTableId();
                     ShareQueueTable table;
-                    if (destTableId != null) {
+                    if (destTableId != null &&destTableId!=-1) {
                         if (notFullTables.containsKey(destTableId)) {
                             table = notFullTables.get(destTableId);
                         } else {

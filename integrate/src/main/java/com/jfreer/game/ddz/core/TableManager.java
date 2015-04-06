@@ -9,4 +9,6 @@ import com.jfreer.game.ddz.player.RobotPlayer;
 public abstract class TableManager {
     public abstract void raiseHands(Player player, Integer tableId);
     public abstract void joinTable(Player player, Integer tableId);
+    public abstract void start();
+    public abstract void stop();
 }

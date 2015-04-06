@@ -106,7 +106,7 @@ public class ShareQueueTable extends Table implements TableOperateListener {
         return true;
     }
 
-    private int getPlayerPos(Player player) throws PlayerNotOnTheTableException {
+    public int getPlayerPos(Player player) throws PlayerNotOnTheTableException {
         for (int i = 0; i < players.length; i++) {
             if (player.equals(players[i])) {
                 return i;

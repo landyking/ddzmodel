@@ -7,6 +7,7 @@ import com.jfreer.game.ddz.core.TableManager;
 import com.jfreer.game.ddz.exception.DDZException;
 import com.jfreer.game.ddz.operate.*;
 import com.jfreer.game.ddz.thread.DDZExecutor;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,17 @@ public class TableManagerForSingleQueueTable extends TableManager {
     private Map<Integer, SingleQueueTable> allTables = new HashMap<Integer, SingleQueueTable>();
 
     public TableManagerForSingleQueueTable() {
+    }
+
+    public void joinTable(Player player, Integer destTableId) {
+        JoinTable e = new JoinTable();
+        e.setPlayer(player);
+        e.setDestTableId(destTableId);
+        tableOperateQueue.add(e);
+    }
+
+    @Override
+    public void start() {
         DDZExecutor.longWorker().execute(new Runnable() {
             @Override
             public void run() {
@@ -31,11 +43,9 @@ public class TableManagerForSingleQueueTable extends TableManager {
         });
     }
 
-    public void joinTable(Player player, Integer destTableId) {
-        JoinTable e = new JoinTable();
-        e.setPlayer(player);
-        e.setDestTableId(destTableId);
-        tableOperateQueue.add(e);
+    @Override
+    public void stop() {
+        throw new UnsupportedOperationException();
     }
 
     public void leftTable(Player player, Integer destTableId) {
@@ -62,7 +72,7 @@ public class TableManagerForSingleQueueTable extends TableManager {
                     Player player = join.getPlayer();
                     Integer destTableId = join.getDestTableId();
                     SingleQueueTable table;
-                    if (destTableId != null) {
+                    if (destTableId != null &&destTableId!=-1) {
                         if (notFullTables.containsKey(destTableId)) {
                             table = notFullTables.get(destTableId);
                         } else {
