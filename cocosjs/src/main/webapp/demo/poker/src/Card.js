@@ -6,10 +6,10 @@ var Card = cc.Class.extend({
     _selected: false,
     _cardValue: null,
     touchListener: null,
-    get selected() {
+    isSelected:function() {
         return this._selected;
     },
-    get cardValue() {
+    getCardValue:function() {
         return this._cardValue;
     },
 
@@ -43,7 +43,7 @@ var Card = cc.Class.extend({
             });
             cc.eventManager.addListener(this.touchListener, this.sprite);
         }
-        parent.addChild(sprite);
+        parent.addChild(sprite,54-cardValue);
     },
     getWidth: function () {
         this.sprite.getContentSize().width;

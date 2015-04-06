@@ -3,11 +3,9 @@
  */
 var BelowCards = cc.Class.extend({
     cardNum: 3,
-    _cards: null,
     node: null,
 
-    ctor: function (parent, cards) {
-        this._cards = cards;
+    ctor: function (parent) {
         this.node = new cc.Node();
         var contentWidth = this.cardNum * Global.unitWidth;
         this.node.setContentSize(contentWidth, Global.unitHeight);
@@ -25,10 +23,10 @@ var BelowCards = cc.Class.extend({
         }
         this.node.setVisible(true);
     },
-    showCards: function () {
+    showCards: function (cards) {
         this.node.removeAllChildren(true);
         for (var i = 0; i < this.cardNum; i++) {
-            var sprite = Global.createSpriteForCard(this._cards[i]);
+            var sprite = Global.createSpriteForCard(cards[i]);
             sprite.setPosition(Global.unitWidth / 2 + i * Global.unitWidth, Global.unitHeight / 2);
             this.node.addChild(sprite);
         }

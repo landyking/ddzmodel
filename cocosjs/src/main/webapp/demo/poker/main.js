@@ -55,7 +55,7 @@ cc.game.onStart = function () {
     //load resources
     cc.LoaderScene.preload(g_resources, function () {
         Global.init();
-        cc.director.runScene(new HelloWorldScene());
+        cc.director.runScene(new StartMenuScene());
     }, this);
 };
 cc.game.run();

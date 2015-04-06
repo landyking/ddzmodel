@@ -9,11 +9,13 @@
   "modules": ["cocos2d"],
   "jsList": [
     "src/resource.js",
-    "src/app.js",
+    "src/TableScene.js",
     "src/Card.js",
     "src/HandCards.js",
     "src/Global.js",
     "src/BelowCards.js",
-    "src/TimerLayer.js"
+    "src/TimerLayer.js",
+    "src/StartMenuScene.js",
+    "src/Player.js"
   ]
 }

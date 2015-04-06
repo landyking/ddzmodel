@@ -5,53 +5,76 @@ var HandCards = cc.Class.extend({
     cardGapSize: 15,
     picWidthCount: 13,
     picHeightCount: 5,
-    _cards: [],
+    spriteCards: [],
     node: null,
+    needListener: false,
+    location: null,
+    canSee: false,
 
     ctor: function (parent, location, cards) {
-
-        var hcsLength = (cards.length - 1) * this.cardGapSize + Global.unitWidth;
+        this.spriteCards = [];
+        this.location = location;
         var node = new cc.Node();
         this.node = node;
-
-        var needListener = false;
-        node.setContentSize(cc.size(hcsLength, Global.unitHeight));
-
-        if ("center" == location) {
-            //center
-            node.setPosition((cc.winSize.width - hcsLength) / 2, 0);
-            needListener = true;
-        } else if ("right" == location) {
-            //right
-            node.setRotation(-90);
-            node.setPosition(cc.winSize.width, (cc.winSize.height - hcsLength) / 2);
-        } else if ("left" == location) {
-            //left
-            node.setRotation(90);
-            node.setPosition(0, (cc.winSize.height + hcsLength) / 2);
-        }
-
+        this.needListener = ("south" == location);
+        this.canSee = ("south" == location);
+        cards.sort(function (a, b) {
+            return b - a;
+        });
         for (var i in cards) {
             var val = cards[i];
             var sprite = Global.createSpriteForCard(val);
             sprite.setPosition(cc.p(Global.unitWidth / 2 + i * this.cardGapSize, Global.unitHeight / 2));
-            var card = new Card(node, sprite, val, needListener);
-            this._cards.push(card);
+            var card = new Card(node, sprite, val, this.needListener);
+            this.spriteCards.push(card);
         }
+
+        this.updateNodeProperties();
 
         parent.addChild(this.node);
     },
-    onEnter: function () {
-        this._super();
+    updateNodeProperties: function () {
+        var hcsLength = (this.spriteCards.length - 1) * this.cardGapSize + Global.unitWidth;
+        this.node.setContentSize(cc.size(hcsLength, Global.unitHeight));
+        if ("south" == this.location) {
+            this.node.setPosition((cc.winSize.width - hcsLength) / 2, 0);
+        } else if ("east" == this.location) {
+            this.node.setRotation(-90);
+            this.node.setPosition(cc.winSize.width, (cc.winSize.height - hcsLength) / 2);
+        } else if ("west" == this.location) {
+            this.node.setRotation(90);
+            this.node.setPosition(0, (cc.winSize.height + hcsLength) / 2);
+        } else if ("center" == this.location) {
+            this.node.setPosition((cc.winSize.width - hcsLength) / 2, (cc.winSize.height - Global.unitHeight) / 2);
+        }
     },
-    onExit: function () {
-        this._super();
-    },
-    /**
+    updateHandCardsPosition: function () {
+        for (var i in this.spriteCards) {
+            var cd = this.spriteCards[i];
+            cd.sprite.setPosition(cc.p(Global.unitWidth / 2 + i * this.cardGapSize, Global.unitHeight / 2));
+            // cd.sprite.setGlobalZOrder(cd.getCardValue());
+        }
+    }, /**
      * 加入指定的牌
      * @param cards
      */
     addCards: function (cards) {
+        for (var i in cards) {
+            var val = cards[i];
+            if(!this.canSee){
+                val=-1;
+            }
+            var sprite = Global.createSpriteForCard(val);
+            var card = new Card(this.node, sprite, val, this.needListener);
+            this.spriteCards.push(card);
+        }
+        if(this.canSee){
+            this.spriteCards.sort(function (a, b) {
+                return b.getCardValue() - a.getCardValue();
+            });
+        }
+        this.updateNodeProperties();
+        this.updateHandCardsPosition();
 
     },
     /**
@@ -59,7 +82,38 @@ var HandCards = cc.Class.extend({
      * @param cards
      */
     removeCards: function (cards) {
+        if (!this.canSee) {
+            for (var i in cards) {
+                var cd=this.spriteCards.pop();
+                cd.removeFromParent();
+            }
+        }else{
+            for (var i in cards) {
+                var rd = cards[i];
+                for (var y in this.spriteCards) {
+                    var cd = this.spriteCards[y];
+                    if (rd == cd.getCardValue()) {
+                        cd.removeFromParent();
+                        this.spriteCards.splice(y, 1);
+                        break;
+                    }
+                }
+            }
+        }
 
+        this.updateNodeProperties();
+        this.updateHandCardsPosition();
+    },
+    /**
+     * 清空手中所有的牌
+     */
+    emptyCards: function () {
+        for (var y in this.spriteCards) {
+            var cd = this.spriteCards[y];
+            cd.removeFromParent();
+            this.spriteCards[y] = null;
+        }
+        this.spriteCards = [];
     },
     /**
      * 取消选中所有牌
@@ -74,14 +128,17 @@ var HandCards = cc.Class.extend({
 
     },
     removeFromParent: function () {
-        for (var i in this._cards) {
-            var cd = this._cards[i];
+        for (var i in this.spriteCards) {
+            var cd = this.spriteCards[i];
             cd.removeFromParent();
 
-            delete this._cards[i];
+            delete this.spriteCards[i];
         }
-        this._cards = null;
+        this.spriteCards = null;
         this.node.removeFromParent();
         this.node = null;
+    },
+    getBoundingBox: function () {
+        return this.node.getBoundingBox();
     }
 });

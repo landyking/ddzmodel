@@ -26,11 +26,11 @@ var TimerLayer = cc.Layer.extend({
         this.cancelTimer();
         this.timeout = len;
         this.timeoutLabel.setVisible(true);
-        if ("center" == location) {
+        if ("south" == location) {
             this.timeoutLabel.setPosition(cc.winSize.width / 2, Global.unitHeight * 1.5);
-        } else if ("left" == location) {
+        } else if ("west" == location) {
             this.timeoutLabel.setPosition(Global.unitHeight * 1.5, cc.winSize.height / 2);
-        } else if ("right" == location) {
+        } else if ("east" == location) {
             this.timeoutLabel.setPosition(cc.winSize.width - Global.unitHeight * 1.5, cc.winSize.height / 2);
         }
         this.schedule(this.updateTimeout, 1);
