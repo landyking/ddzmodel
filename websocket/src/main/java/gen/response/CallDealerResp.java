@@ -16,6 +16,9 @@ public class CallDealerResp extends IResp {
     /** 1:call,0:give up */
     private int isCall;
 
+    /** 下一个人的位置 */
+    private int nextTablePos;
+
     public CallDealerResp() {
         super(5);
     }
@@ -42,6 +45,14 @@ public class CallDealerResp extends IResp {
 
     public int getIsCall(){
         return this.isCall;
+    }
+
+    public void setNextTablePos(int nextTablePos){
+        this.nextTablePos=nextTablePos;
+    }
+
+    public int getNextTablePos(){
+        return this.nextTablePos;
     }
 
 }

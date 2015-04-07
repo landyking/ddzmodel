@@ -2,14 +2,9 @@ package com.jfreer.game.websocket.config;
 
 import com.google.common.base.Strings;
 import com.jfreer.game.ddz.core.TableManager;
-import com.jfreer.game.ddz.core.share.TableManagerForShareQueueTable;
-import com.jfreer.game.ddz.thread.ProcessManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 

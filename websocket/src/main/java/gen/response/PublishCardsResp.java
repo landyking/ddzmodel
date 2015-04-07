@@ -10,6 +10,9 @@ public class PublishCardsResp extends IResp {
     /** 用户id */
     private int pid;
 
+    /** 开始叫地主的位置 */
+    private int nextTablePos;
+
     /** 手牌 */
     private int[] cards;
 
@@ -23,6 +26,14 @@ public class PublishCardsResp extends IResp {
 
     public int getPid(){
         return this.pid;
+    }
+
+    public void setNextTablePos(int nextTablePos){
+        this.nextTablePos=nextTablePos;
+    }
+
+    public int getNextTablePos(){
+        return this.nextTablePos;
     }
 
     public void setCards(int[] cards){

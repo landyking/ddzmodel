@@ -5,6 +5,7 @@ import com.jfreer.game.ddz.HistoryCards;
 import com.jfreer.game.ddz.Player;
 import com.jfreer.game.ddz.core.Table;
 import com.jfreer.game.ddz.core.TableManager;
+import com.jfreer.game.ddz.exception.PlayerNotOnTheTableException;
 import com.jfreer.game.ddz.thread.DDZExecutor;
 import com.jfreer.game.websocket.protocol.IResp;
 
@@ -27,10 +28,6 @@ public class RobotPlayer extends Player {
         return "Robot:" + this.getPlayerId();
     }
 
-    @Override
-    public void notifyCallDealer(Table table, byte orderNo) {
-        table.callDealer(this, random.nextBoolean(), orderNo);
-    }
 
     @Override
     public void turnToPlay(final Table table, final byte oldOrderNo, final HistoryCards lastHistory) {
@@ -76,7 +73,7 @@ public class RobotPlayer extends Player {
     @Override
     public void afterGameOver(Table table) {
         super.afterGameOver(table);
-        this.tableManager.raiseHands(this,table.getTableId());
+        this.tableManager.raiseHands(this, table.getTableId());
     }
 
     @Override
@@ -84,9 +81,31 @@ public class RobotPlayer extends Player {
 
     }
 
-    @Override
-    public void afterCallDealer(boolean call) {
 
+    @Override
+    public void notifyBeginPlay(int nextTablePos) {
+        makeAutoCallDealer(nextTablePos);
+    }
+
+    private void makeAutoCallDealer(int nextTablePos) {
+        try {
+            int playerPos = getCurrentTable().getPlayerPos(this);
+            if (nextTablePos == playerPos) {
+                DDZExecutor.shortWorker().schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        getCurrentTable().callDealer(RobotPlayer.this, random.nextBoolean(), (byte) 0);
+                    }
+                }, 3, TimeUnit.SECONDS);
+            }
+        } catch (PlayerNotOnTheTableException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void notifyCallDealer(int tablePos, int nextTablePos, boolean call) {
+        makeAutoCallDealer(nextTablePos);
     }
 
     @Override

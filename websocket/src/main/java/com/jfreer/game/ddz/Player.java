@@ -54,7 +54,6 @@ public abstract class Player {
     }
 
 
-    public abstract void notifyCallDealer(Table table, byte orderNo);
 
     private void addHandCards(byte[] card) {
         for (byte one : card) {
@@ -113,5 +112,8 @@ public abstract class Player {
     }
     public abstract void pushToClient(IResp resp) ;
 
-    public abstract void afterCallDealer(boolean call);
+
+    public abstract void notifyBeginPlay(int nextTablePos);
+
+    public abstract void notifyCallDealer(int tablePos, int nextTablePos, boolean call);
 }

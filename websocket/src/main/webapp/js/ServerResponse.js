@@ -20,10 +20,6 @@ ServerResponse.processResponse = function (ctx,e) {
             ServerResponse.PublishCards(ctx,JSON.parse(parse.data));
             break;
         
-        case 4: //通知叫地主
-            ServerResponse.NotifyCallDealer(ctx,JSON.parse(parse.data));
-            break;
-        
         case 5: //叫地主
             ServerResponse.CallDealer(ctx,JSON.parse(parse.data));
             break;
