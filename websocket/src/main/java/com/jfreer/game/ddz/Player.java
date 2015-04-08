@@ -83,9 +83,6 @@ public abstract class Player {
         }
     }
 
-    public abstract void turnToPlay(Table table, byte oldOrderNo, HistoryCards lastHistory);
-
-    public abstract void notifyPlayedCards(HistoryCards history);
 
 
     public void afterJoinTable(Table table) {
@@ -115,5 +112,9 @@ public abstract class Player {
 
     public abstract void notifyBeginPlay(int nextTablePos);
 
-    public abstract void notifyCallDealer(int tablePos, int nextTablePos, boolean call);
+    public abstract void notifyCallDealer(int tablePos, int nextTablePos, int callFlag);
+
+    public abstract void notifyBelowCards(int dealerPos, byte[] belowCards);
+
+    public abstract void notifyPlayedCards(int tablePos, int nextTablePos, byte[] cards, HistoryCards lastHistory);
 }

@@ -6,9 +6,7 @@ import com.jfreer.game.ddz.core.Table;
 import com.jfreer.game.ddz.exception.PlayerNotOnTheTableException;
 import com.jfreer.game.websocket.handler.DDZSession;
 import com.jfreer.game.websocket.protocol.IResp;
-import gen.response.CallDealerResp;
-import gen.response.JoinTableResp;
-import gen.response.PublishCardsResp;
+import gen.response.*;
 
 import java.io.IOException;
 
@@ -32,16 +30,6 @@ public class DDZPlayer extends Player {
         return session;
     }
 
-
-    @Override
-    public void turnToPlay(Table table, byte oldOrderNo, HistoryCards lastHistory) {
-
-    }
-
-    @Override
-    public void notifyPlayedCards(HistoryCards history) {
-
-    }
 
     @Override
     public void afterTableFull(Table table) {
@@ -85,21 +73,42 @@ public class DDZPlayer extends Player {
     }
 
     @Override
-    public void notifyCallDealer(int tablePos, int nextTablePos, boolean call) {
+    public void notifyCallDealer(int tablePos, int nextTablePos, int callFlag) {
         CallDealerResp resp = new CallDealerResp();
         resp.setPid(getPlayerId());
-        resp.setIsCall(call ? 1 : 0);
+        resp.setIsCall(callFlag);
         resp.setTablePos(tablePos);
         resp.setNextTablePos(nextTablePos);
-        pushToSameTableAllPlayer(resp);
+        pushToClient(resp);
+
     }
 
-    public void pushToSameTableAllPlayer(final IResp resp) {
-        getCurrentTable().eachPlayer(new Table.ApplyPlayer() {
-            @Override
-            public void apply(Player one) {
-                one.pushToClient(resp);
-            }
-        });
+    @Override
+    public void notifyBelowCards(int dealerPos, byte[] belowCards) {
+        PublishBelowCardsResp resp = new PublishBelowCardsResp();
+        resp.setBelowCards(toInt(belowCards));
+        resp.setDealerTablePos(dealerPos);
+        pushToClient(resp);
+    }
+
+    @Override
+    public void notifyPlayedCards(int tablePos, int nextTablePos, byte[] cards, HistoryCards lastCards) {
+        PlayCardsResp resp = new PlayCardsResp();
+        resp.setTablePos(tablePos);
+        resp.setNextTablePos(nextTablePos);
+        resp.setGiveUp(cards == null ? 1 : 0);
+        resp.setCards(toInt(cards));
+        pushToClient(resp);
+    }
+
+    private int[] toInt(byte[] cards) {
+        if (cards == null) {
+            return new int[0];
+        }
+        int[] rst = new int[cards.length];
+        for (int i = 0; i < cards.length; i++) {
+            rst[i] = cards[i];
+        }
+        return rst;
     }
 }

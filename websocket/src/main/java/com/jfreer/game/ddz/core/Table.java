@@ -11,6 +11,8 @@ import com.jfreer.game.ddz.thread.DDZExecutor;
 import com.jfreer.game.ddz.thread.ProcessManager;
 import com.jfreer.game.ddz.thread.TableOperateListener;
 import com.jfreer.game.ddz.thread.TableOperateProcess;
+import com.jfreer.game.websocket.protocol.IResp;
+import gen.response.PublishBelowCardsResp;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -54,8 +56,8 @@ public class Table implements TableOperateListener {
         return true;
     }
 
-    private Player[] getPlayers() {
-        return players;
+    public Player getPlayerByPos(int pos) {
+        return players[pos];
     }
 
     void joinTable(Player player) throws TableAlreadyFullException {
@@ -153,6 +155,20 @@ public class Table implements TableOperateListener {
         for (Player one : players) {
             Log.info(getTableId(), one.toString() + ":" + one.getHandCards());
         }
+        notifyBelowCards(this.belowCards);
+    }
+
+    private int getDealerPos() {
+        return dealerPos;
+    }
+
+    private void notifyBelowCards(final byte[] belowCards) {
+        eachPlayer(new ApplyPlayer() {
+            @Override
+            public void apply(Player one) {
+                one.notifyBelowCards(getDealerPos(), belowCards);
+            }
+        });
     }
 
     private void doCallDealer(CallDealer callDealer) {
@@ -164,19 +180,22 @@ public class Table implements TableOperateListener {
                 dealerPos = currentPos;
                 tableState = Consts.TableState.RaiseDealer;
                 //Log.info(getTableId(),"进入抢地主状态....");
+                checkOverAndNotifyNextCallDealer(1);
             } else {
                 Log.info(getTableId(), player + "不叫!" + callDealer.getOrderNo());
                 callDealerFlag[currentPos] = 0;
                 if (noPlayerCall()) {
-                    notifyCallDealer(currentPos, -1, callDealer.isCall());
+                    notifyCallDealer(currentPos, -1, 0);
                     this.tableState = Consts.TableState.PublishCard;
                     PublishCards event = new PublishCards();
                     event.setDestTableId(getTableId());
                     operateProcess.addOperate(event);
                     return;
+                }else{
+                    checkOverAndNotifyNextCallDealer(0);
                 }
             }
-            checkOverAndNotifyNextCallDealer(callDealer);
+
         }
     }
 
@@ -189,39 +208,47 @@ public class Table implements TableOperateListener {
                 Log.info(getTableId(), player + "抢地主!" + callDealer.getOrderNo());
                 dealerPos = currentPos;
                 callDealerFlag[currentPos] = 0;
+                checkOverAndNotifyNextCallDealer(2);
             } else {
                 Log.info(getTableId(), player + "不抢!" + callDealer.getOrderNo());
                 callDealerFlag[currentPos] = 0;
+                checkOverAndNotifyNextCallDealer(3);
             }
-            checkOverAndNotifyNextCallDealer(callDealer);
         }
     }
 
     /**
      * @param tablePos     当前操作的玩家位置
      * @param nextTablePos 下一个执行操作的玩家的位置,-1表示叫(抢)地主结束,没有下一个
-     * @param call
+     * @param callFlag
      */
-    private void notifyCallDealer(final int tablePos, final int nextTablePos, final boolean call) {
+    private void notifyCallDealer(final int tablePos, final int nextTablePos, final int callFlag) {
         eachPlayer(new ApplyPlayer() {
             @Override
             public void apply(Player one) {
-                one.notifyCallDealer(tablePos, nextTablePos, call);
+                one.notifyCallDealer(tablePos, nextTablePos, callFlag);
             }
         });
     }
 
-    private void checkOverAndNotifyNextCallDealer(CallDealer callDealer) {
+    private void checkOverAndNotifyNextCallDealer(int  callFlag) {
         int oldPos = currentPos;
 
         if (isDealerSure()) {
             //最后一个叫地主
-            notifyCallDealer(oldPos, -1, callDealer.isCall());
+            notifyCallDealer(oldPos, -1, callFlag);
 
             tableState = Consts.TableState.PublishBelowCard;
-            PublishBelowCards event = new PublishBelowCards();
-            event.setDestTableId(getTableId());
-            operateProcess.addOperate(event);
+            //延迟两秒再向客户端推送底牌信息
+            DDZExecutor.shortWorker().schedule(new Runnable() {
+                @Override
+                public void run() {
+                    PublishBelowCards event = new PublishBelowCards();
+                    event.setDestTableId(getTableId());
+                    operateProcess.addOperate(event);
+                }
+            },2,TimeUnit.SECONDS);
+
             Log.info(getTableId(), "地主为" + players[dealerPos]);
             return;
         }
@@ -233,7 +260,7 @@ public class Table implements TableOperateListener {
             currentPos = getNextPos(currentPos);
         }
 //        players[currentPos].notifyCallDealer(this, orderNo);
-        notifyCallDealer(oldPos, currentPos, callDealer.isCall());
+        notifyCallDealer(oldPos, currentPos, callFlag);
         playFuture = DDZExecutor.shortWorker().schedule(new AutoCallDealer(players[currentPos], false, orderNo), 30, TimeUnit.SECONDS);
     }
 
@@ -310,15 +337,6 @@ public class Table implements TableOperateListener {
         }
     }
 
-
-    private void notifyDealerPlay() {
-        currentPos = dealerPos;
-        Log.info(getTableId(), "牌局开始,地主" + players[currentPos] + "先出");
-        players[currentPos].turnToPlay(this, orderNo, null);//通知下个玩家出牌
-        //设置超时处理器
-        playFuture = DDZExecutor.shortWorker().schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
-    }
-
     /**
      * 处理出牌
      *
@@ -338,6 +356,7 @@ public class Table implements TableOperateListener {
             operate.fail("牌型不合法!");
             return;
         }
+        int oldPos=currentPos;
         //2.如果是跟出,则检查是否比被跟的牌大.
         if (isMaster(player) || isGreaterThanLast(operate.getCards())) {
             Log.info(getTableId(), player + "出牌:" + Arrays.toString(operate.getCards()));
@@ -350,11 +369,11 @@ public class Table implements TableOperateListener {
             //3.设置上次出牌玩家为当前用户
             HistoryCards history = new HistoryCards(player.getPlayerId(), operate.getCards());
             historyCards.addLast(history);
-            //4.通知所有玩家出牌信息
-            notifyAllPlayer(history);
+
             //5.检查该玩家的牌是否出完,出完则gameover
             if (player.getHandCards().isEmpty()) {
                 Log.info(getTableId(), player + "牌出完!");
+                notifyPlayedCards(oldPos, -1, history.getCards());
                 this.tableState = Consts.TableState.GameOver;
                 GameOverEvent event = new GameOverEvent();
                 event.setDestTableId(getTableId());
@@ -364,12 +383,22 @@ public class Table implements TableOperateListener {
             //6.操作位置切换为下一个
             currentPos = getNextPos(currentPos);
             orderNo++;
-            players[currentPos].turnToPlay(this, orderNo, historyCards.getLast());//通知下个玩家出牌
+            //4.通知所有玩家出牌信息
+            notifyPlayedCards(oldPos, currentPos, history.getCards());
             //设置超时处理器
             playFuture = DDZExecutor.shortWorker().schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
         } else {
             operate.fail("没有上家牌大!");
         }
+    }
+
+    private void notifyPlayedCards(final int tablePos, final int nextTablePos, final byte[] cards) {
+        eachPlayer(new ApplyPlayer() {
+            @Override
+            public void apply(Player one) {
+                one.notifyPlayedCards(tablePos,nextTablePos,cards,Table.this.historyCards.peekLast());
+            }
+        });
     }
 
     private void onGameOver() {
@@ -387,6 +416,7 @@ public class Table implements TableOperateListener {
     }
 
     private boolean processPlayNothing(PlayCards playNothing, Player player) {
+
         //是否可以不出
         //1.如果上次出牌玩家为当前玩家,则必须出,否则可以不出
         if (isMaster(player)) {
@@ -394,26 +424,22 @@ public class Table implements TableOperateListener {
             return false;
         }
         Log.info(getTableId(), player + "不出牌");
+        int oldPos=currentPos;
         //如果不出
         //1.取消超时操作
         //2.通知所有玩家,不出
         //3.操作位置切换为下一个
         stopPlayFuture();
-        notifyAllPlayer(new HistoryCards(player.getPlayerId(), null));
 
         currentPos = getNextPos(currentPos);
         orderNo++;
-        players[currentPos].turnToPlay(this, orderNo, historyCards.getLast());//通知下个玩家出牌
+        notifyPlayedCards(oldPos,currentPos,null);
         //设置超时处理器
         playFuture = DDZExecutor.shortWorker().schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
         return true;
     }
 
-    private void notifyAllPlayer(HistoryCards history) {
-        for (Player one : players) {
-            one.notifyPlayedCards(history);
-        }
-    }
+
 
     private boolean isGreaterThanLast(byte[] cards) {
         return CardUtils.isGreater(cards, historyCards.getLast().getCards());
@@ -584,10 +610,13 @@ public class Table implements TableOperateListener {
                     break;
                 case PublishBelowCard:
                     if (event instanceof PublishBelowCards) {
+                        currentPos=dealerPos;
                         publishBlowCards();
                         this.tableState = Consts.TableState.Playing;
                         //通知地主出牌
-                        notifyDealerPlay();
+                        //Log.info(getTableId(), "牌局开始,地主" + players[currentPos] + "先出");
+                        //设置超时处理器
+                        playFuture = DDZExecutor.shortWorker().schedule(new AutoPlay(players[currentPos], this.orderNo), PLAY_TIME_OUT, TimeUnit.SECONDS);
                     }
                     break;
                 case Playing:

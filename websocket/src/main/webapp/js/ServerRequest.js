@@ -14,7 +14,8 @@ ServerRequest.AnonymousLogin = function (pid) {
 
 /**
  * 加入桌子
- * @param tableId    桌号，默认-1* @param pid    玩家id
+ * @param tableId    桌号，默认-1
+ * @param pid    玩家id
  */
 ServerRequest.JoinTable = function (tableId,pid) {
     this._send(1, {tableId:tableId,pid:pid});
@@ -30,9 +31,20 @@ ServerRequest.RaiseHand = function (pid) {
 
 /**
  * 叫地主
- * @param pid    player id* @param isCall    1:call,0:give up
+ * @param pid    player id
+ * @param isCall    1:call,0:give up
  */
 ServerRequest.CallDealer = function (pid,isCall) {
     this._send(5, {pid:pid,isCall:isCall});
+};
+
+/**
+ * 出牌
+ * @param pid    player id
+ * @param giveUp    1:give up,0:not
+ * @param cards    played cards
+ */
+ServerRequest.PlayCards = function (pid,giveUp,cards) {
+    this._send(7, {pid:pid,giveUp:giveUp,cards:cards});
 };
 

@@ -29,40 +29,8 @@ public class RobotPlayer extends Player {
     }
 
 
-    @Override
-    public void turnToPlay(final Table table, final byte oldOrderNo, final HistoryCards lastHistory) {
-        /**
-         * 出牌时机:为了更像真人,机器人的出牌延迟在5~15秒之间随机
-         */
-        int delay = random.nextInt(10) + 5;
 
-        DDZExecutor.shortWorker().schedule(new Runnable() {
-            @Override
-            public void run() {
-                /**
-                 * 如果是主导者,则选最小的牌出
-                 * 如果是跟出者,则选择最小的但是比上家大的牌出,如果没有,则不出.
-                 */
-                if (lastHistory == null || getPlayerId().equals(lastHistory.getPlayerId())) {
-                    byte[] minCards = CardUtils.getMinCards(getHandCards());
-                    table.playCards(RobotPlayer.this, minCards, oldOrderNo);
-                } else {
-                    byte[] cardsGreaterThan = CardUtils.getCardsGreaterThan(lastHistory.getCards(), getHandCards());
-                    if (cardsGreaterThan != null && cardsGreaterThan.length > 0) {
-                        table.playCards(RobotPlayer.this, cardsGreaterThan, oldOrderNo);
-                    } else {
-                        table.playNothing(RobotPlayer.this, oldOrderNo);
-                    }
-                }
-            }
-        }, delay, TimeUnit.SECONDS);
 
-    }
-
-    @Override
-    public void notifyPlayedCards(HistoryCards history) {
-
-    }
 
     @Override
     public void afterJoinTable(Table table) {
@@ -84,17 +52,18 @@ public class RobotPlayer extends Player {
 
     @Override
     public void notifyBeginPlay(int nextTablePos) {
-        makeAutoCallDealer(nextTablePos);
+        notifyCallDealer(-1,nextTablePos,-1);
     }
 
-    private void makeAutoCallDealer(int nextTablePos) {
+
+    @Override
+    public void notifyCallDealer(int tablePos, int nextTablePos, int callFlag) {
         try {
-            int playerPos = getCurrentTable().getPlayerPos(this);
-            if (nextTablePos == playerPos) {
+            if (nextTablePos == getCurrentTable().getPlayerPos(this)) {
                 DDZExecutor.shortWorker().schedule(new Runnable() {
                     @Override
                     public void run() {
-                        getCurrentTable().callDealer(RobotPlayer.this, random.nextBoolean(), (byte) 0);
+                        getCurrentTable().callDealer(RobotPlayer.this,true /*random.nextBoolean()*/, (byte) 0);
                     }
                 }, 3, TimeUnit.SECONDS);
             }
@@ -104,8 +73,44 @@ public class RobotPlayer extends Player {
     }
 
     @Override
-    public void notifyCallDealer(int tablePos, int nextTablePos, boolean call) {
-        makeAutoCallDealer(nextTablePos);
+    public void notifyBelowCards(int dealerPos, byte[] belowCards) {
+        notifyPlayedCards(-1,dealerPos,null,null);
+    }
+
+    @Override
+    public void notifyPlayedCards(int tablePos, int nextTablePos, byte[] cards, final HistoryCards lastHistory) {
+        try {
+            if(nextTablePos==getCurrentTable().getPlayerPos(this)) {
+                /**
+                 * 出牌时机:为了更像真人,机器人的出牌延迟在5~15秒之间随机
+                 */
+                int delay = random.nextInt(10) + 5;
+
+                DDZExecutor.shortWorker().schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        /**
+                         * 如果是主导者,则选最小的牌出
+                         * 如果是跟出者,则选择最小的但是比上家大的牌出,如果没有,则不出.
+                         */
+                        if (lastHistory == null || getPlayerId().equals(lastHistory.getPlayerId())) {
+                            byte[] minCards = CardUtils.getMinCards(getHandCards());
+                            getCurrentTable().playCards(RobotPlayer.this, minCards, (byte) 0);
+                        } else {
+                            byte[] cardsGreaterThan = CardUtils.getCardsGreaterThan(lastHistory.getCards(), getHandCards());
+                            if (cardsGreaterThan != null && cardsGreaterThan.length > 0) {
+                                getCurrentTable().playCards(RobotPlayer.this, cardsGreaterThan, (byte) 0);
+                            } else {
+                                getCurrentTable().playNothing(RobotPlayer.this, (byte) 0);
+                            }
+                        }
+                    }
+                }, delay, TimeUnit.SECONDS);
+            }
+        } catch (PlayerNotOnTheTableException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override

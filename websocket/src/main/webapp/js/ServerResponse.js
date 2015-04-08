@@ -24,5 +24,13 @@ ServerResponse.processResponse = function (ctx,e) {
             ServerResponse.CallDealer(ctx,JSON.parse(parse.data));
             break;
         
+        case 6: //发底牌
+            ServerResponse.PublishBelowCards(ctx,JSON.parse(parse.data));
+            break;
+        
+        case 7: //出牌
+            ServerResponse.PlayCards(ctx,JSON.parse(parse.data));
+            break;
+        
     }
 }

@@ -17,7 +17,7 @@ var HandCards = cc.Class.extend({
         var node = new cc.Node();
         this.node = node;
         this.needListener = ("south" == location);
-        this.canSee = ("south" == location);
+        this.canSee = (["south","center"].indexOf(location) != -1);
         cards.sort(function (a, b) {
             return b - a;
         });

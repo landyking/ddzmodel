@@ -10,6 +10,7 @@ var Player = cc.Class.extend({
 
     ctor: function (parent,location,cards) {
         var blackColor = cc.color(0, 0, 0);
+        this.countdownNum=0;
         this.handCards=new HandCards(parent,location,cards);
         this.titleLabel=new cc.LabelTTF("无名","Arial",12);
         this.titleLabel.setFontFillColor(blackColor)
@@ -36,6 +37,8 @@ var Player = cc.Class.extend({
         }
         parent.addChild(this.titleLabel);
         parent.addChild(this.actionLabel);
+
+        return true;
     },
     /**
      * 设置头衔：地主|农民|无名
@@ -68,7 +71,9 @@ var Player = cc.Class.extend({
      */
     startCountdown: function (len) {
         this.countdownNum=len||30;
-        this.actionLabel.schedule(this._updateCountdown.bind(this), 1);
+        //标记，用于取消定时器。
+        this._func4cancel=this._updateCountdown.bind(this);
+        this.actionLabel.schedule(this._func4cancel, 1);
     },
     _updateCountdown:function(){
         this.actionLabel.setString(""+this.countdownNum);
@@ -83,7 +88,8 @@ var Player = cc.Class.extend({
      */
     cancelCountdown: function () {
         this.actionLabel.setString("");
-        this.actionLabel.unschedule(this._updateCountdown);
+        this.actionLabel.unschedule(this._func4cancel);
+        this._func4cancel=null;
     },
     /**
      * 显示操作按钮：出牌，不出，提示

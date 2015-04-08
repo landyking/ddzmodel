@@ -87,7 +87,23 @@ public class TestPlayer extends Player {
     }
 
     @Override
-    public void afterCallDealer(boolean call) {
+    public void notifyBeginPlay(int nextTablePos) {
 
     }
+
+    @Override
+    public void notifyCallDealer(int tablePos, int nextTablePos, int callFlag) {
+
+    }
+
+    @Override
+    public void notifyBelowCards(int dealerPos, byte[] belowCards) {
+
+    }
+
+    @Override
+    public void notifyPlayedCards(int tablePos, int nextTablePos, byte[] cards, HistoryCards lastHistory) {
+
+    }
+
 }

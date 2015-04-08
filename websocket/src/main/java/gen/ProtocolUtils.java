@@ -9,6 +9,8 @@ import gen.handler.RaiseHandHandler;
 import gen.request.RaiseHandReq;
 import gen.handler.CallDealerHandler;
 import gen.request.CallDealerReq;
+import gen.handler.PlayCardsHandler;
+import gen.request.PlayCardsReq;
 
 
 import java.util.HashMap;
@@ -40,5 +42,6 @@ public class ProtocolUtils {
         REQ_MAPPINGS.put(1, new Tuple(JoinTableReq.class,JoinTableHandler.class));
         REQ_MAPPINGS.put(2, new Tuple(RaiseHandReq.class,RaiseHandHandler.class));
         REQ_MAPPINGS.put(5, new Tuple(CallDealerReq.class,CallDealerHandler.class));
+        REQ_MAPPINGS.put(7, new Tuple(PlayCardsReq.class,PlayCardsHandler.class));
     }
 }

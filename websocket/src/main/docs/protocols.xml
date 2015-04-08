@@ -2,7 +2,7 @@
 <!DOCTYPE protocols [
         <!ELEMENT protocols (protocol*)>
         <!ELEMENT protocol      (req?,resp?)>
-        <!ELEMENT req    (field+)>
+        <!ELEMENT req    (field+,array?)>
         <!ELEMENT resp (field+,array?)>
         <!ELEMENT array    (field+)>
         <!ELEMENT field    EMPTY>
@@ -58,8 +58,33 @@
         <resp>
             <field type="i" name="pid" desc="用户id"/>
             <field type="i" name="tablePos" desc="桌子位置"/>
-            <field type="i" name="isCall" desc="1:call,0:give up"/>
+            <field type="i" name="isCall" desc="0不叫,1叫地主,2抢地主,3不抢"/>
             <field type="i" name="nextTablePos" desc="下一个人的位置"/>
+        </resp>
+    </protocol>
+    <protocol id="6" name="PublishBelowCards" desc="发底牌">
+        <resp>
+            <field type="i" name="dealerTablePos" desc="地主位置"/>
+            <array>
+                <field type="i" name="belowCards" desc="底牌"/>
+            </array>
+        </resp>
+    </protocol>
+    <protocol id="7" name="PlayCards" desc="出牌">
+        <req>
+            <field type="i" name="pid" desc="player id"/>
+            <field type="i" name="giveUp" desc="1:give up,0:not"/>
+            <array>
+                <field type="b" name="cards" desc="played cards"/>
+            </array>
+        </req>
+        <resp>
+            <field type="i" name="tablePos" desc="player tablePos"/>
+            <field type="i" name="nextTablePos" desc="next player tablePos,-1:game over"/>
+            <field type="i" name="giveUp" desc="1:give up,0:not"/>
+            <array>
+                <field type="i" name="cards" desc="played cards"/>
+            </array>
         </resp>
     </protocol>
 </protocols>

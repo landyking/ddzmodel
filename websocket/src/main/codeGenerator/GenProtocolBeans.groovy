@@ -60,6 +60,9 @@ class GenProtocolBeans {
             cmd.req.field.each {
                 protocol.req << fieldExtract(it)
             }
+            cmd.req.array.field.each {
+                protocol.req << arrayExtract(it)
+            }
             protocol.resp = []
             cmd.resp.field.each {
                 protocol.resp << fieldExtract(it)

@@ -13,7 +13,7 @@ public class CallDealerResp extends IResp {
     /** 桌子位置 */
     private int tablePos;
 
-    /** 1:call,0:give up */
+    /** 0不叫,1叫地主,2抢地主,3不抢 */
     private int isCall;
 
     /** 下一个人的位置 */
